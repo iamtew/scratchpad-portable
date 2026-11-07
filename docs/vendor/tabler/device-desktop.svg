@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" id="Device-Desktop--Streamline-Tabler">
+  <desc>
+    Device Desktop Streamline Icon: https://streamlinehq.com
+  </desc>
+  <path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1H4a1 1 0 0 1 -1 -1V5z" stroke-width="1"></path>
+  <path d="M7 20h10" stroke-width="1"></path>
+  <path d="M9 16v4" stroke-width="1"></path>
+  <path d="M15 16v4" stroke-width="1"></path>
+</svg>
