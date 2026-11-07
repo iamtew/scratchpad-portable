@@ -48,62 +48,66 @@
 
 :root,
 html[data-theme="light"] {
-  --bg: #efe8db;
-  --bg-2: #e4d9c6;
-  --ink: #14110e;
-  --muted: #5c5348;
+  --bg: #e8eef6;
+  --bg-2: #d5deeb;
+  --ink: #141d2b;
+  --muted: #4a5c74;
   --line: color-mix(in srgb, var(--ink) 14%, transparent);
-  --accent: #c42b2b;
-  --accent-ink: #fff8f0;
+  --accent: #c83a3a;
+  --accent-hi: #e85a52;
+  --accent-ink: #f4f7fc;
   --glow: color-mix(in srgb, var(--accent) 22%, transparent);
   --header: color-mix(in srgb, var(--bg) 82%, transparent);
   --shadow: 0 24px 60px color-mix(in srgb, var(--ink) 18%, transparent);
-  --dot: 196 43 43;
+  --dot: 200 58 58;
 }
 
 html[data-theme="dark"] {
-  --bg: #0c0b0a;
-  --bg-2: #161311;
-  --ink: #ece7de;
-  --muted: #a89f92;
+  --bg: #141d2b;
+  --bg-2: #1a2332;
+  --ink: #d7deea;
+  --muted: #a4b1cd;
   --line: color-mix(in srgb, var(--ink) 14%, transparent);
-  --accent: #ff4d3a;
-  --accent-ink: #140807;
+  --accent: #e24b4b;
+  --accent-hi: #ff6b63;
+  --accent-ink: #141d2b;
   --glow: color-mix(in srgb, var(--accent) 28%, transparent);
   --header: color-mix(in srgb, var(--bg) 72%, transparent);
   --shadow: 0 24px 80px color-mix(in srgb, #000 55%, transparent);
-  --dot: 255 77 58;
+  --dot: 226 75 75;
 }
 
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
-    --bg: #0c0b0a;
-    --bg-2: #161311;
-    --ink: #ece7de;
-    --muted: #a89f92;
+    --bg: #141d2b;
+    --bg-2: #1a2332;
+    --ink: #d7deea;
+    --muted: #a4b1cd;
     --line: color-mix(in srgb, var(--ink) 14%, transparent);
-    --accent: #ff4d3a;
-    --accent-ink: #140807;
+    --accent: #e24b4b;
+    --accent-hi: #ff6b63;
+    --accent-ink: #141d2b;
     --glow: color-mix(in srgb, var(--accent) 28%, transparent);
     --header: color-mix(in srgb, var(--bg) 72%, transparent);
     --shadow: 0 24px 80px color-mix(in srgb, #000 55%, transparent);
-    --dot: 255 77 58;
+    --dot: 226 75 75;
   }
 }
 
 @media (prefers-color-scheme: light) {
   html[data-theme="system"] {
-    --bg: #efe8db;
-    --bg-2: #e4d9c6;
-    --ink: #14110e;
-    --muted: #5c5348;
+    --bg: #e8eef6;
+    --bg-2: #d5deeb;
+    --ink: #141d2b;
+    --muted: #4a5c74;
     --line: color-mix(in srgb, var(--ink) 14%, transparent);
-    --accent: #c42b2b;
-    --accent-ink: #fff8f0;
+    --accent: #c83a3a;
+    --accent-hi: #e85a52;
+    --accent-ink: #f4f7fc;
     --glow: color-mix(in srgb, var(--accent) 22%, transparent);
     --header: color-mix(in srgb, var(--bg) 82%, transparent);
     --shadow: 0 24px 60px color-mix(in srgb, var(--ink) 18%, transparent);
-    --dot: 196 43 43;
+    --dot: 200 58 58;
   }
 }
 
@@ -208,8 +212,8 @@ body {
 }
 
 .icon {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.15rem;
+  height: 1.15rem;
   display: inline-block;
   background: currentColor;
   -webkit-mask: var(--icon) center / contain no-repeat;
@@ -329,12 +333,12 @@ li + li {
   align-items: center;
   gap: 0.45rem;
   padding: 0.78rem 1.15rem;
-  background: var(--accent);
+  background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 72%);
   color: var(--accent-ink);
   text-decoration: none;
   font-weight: 600;
   letter-spacing: -0.02em;
-  border-radius: 999px;
+  border-radius: 0.4rem;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, black), 0 12px 32px var(--glow);
 }
 
