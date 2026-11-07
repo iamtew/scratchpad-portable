@@ -5,6 +5,7 @@ I wanted both, so I made this small ruleset.
 
 ## Where to get it
 Download the ZIP archive from the [latest releases page](https://github.com/iamtew/scratchpad-portable/releases/latest).
+Site: [`docs/`](docs/).
 
 ## How to use it
 It's very simple, let me show you:
