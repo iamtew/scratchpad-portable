@@ -9,9 +9,9 @@ Why? Well, assistants are convenient, so are coding agents. I wanted both, so I 
 It's very simple, let me show you:
 1. Copy folder `scratchpad-portable` with its ruleset to somewhere.
 2. (Optional) Rename it to something useful maybe!
-3. Make a workspace with this folder.
+3. Make a workspace with this folder in Cursor or Claude.
 
-That's it! This workspace will now behave more like an assitant and not try and turn everything into your next startup MVP to ship with the intention of getting VC funding outta Silicon Valley. Sometimes we want a bit less 😁
+That's it! The workspace will now behave more like an assitant and not try and turn everything into your next startup MVP to ship with the intention of getting VC funding outta Silicon Valley. Sometimes we want a bit less 😁
 
 ---- 
 
