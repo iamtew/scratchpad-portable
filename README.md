@@ -1,4 +1,4 @@
-# scratchpad-portable - *Use your coding agent as general AI assistant*
+# *Use your coding agent as general AI assistant*
 Ruleset for using Cursor and Claude agents more like assistants! 
 Why? Well, assistants are convenient, so are coding agents. 
 I wanted both, so I made this small ruleset.
