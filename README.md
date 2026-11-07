@@ -15,4 +15,4 @@ That's it! The workspace will now behave more like an assitant and not try and t
 
 ---- 
 
-The contents of this repository is public domain, do what you see fit with it. Enjoy!
+This repository is dedicated to the public domain under [The Unlicense](LICENSE). Enjoy!
