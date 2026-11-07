@@ -3,6 +3,9 @@ Ruleset for using Cursor and Claude agents more like assistants!
 Why? Well, assistants are convenient, so are coding agents. 
 I wanted both, so I made this small ruleset.
 
+## Where to get it
+Download the ZIP archive from the [latest releases page](https://github.com/iamtew/scratchpad-portable/releases/latest).
+
 ## How to use it
 It's very simple, let me show you:
 1. Copy folder `scratchpad-portable` with its ruleset to somewhere.
