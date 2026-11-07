@@ -1,0 +1,21 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip scratchpad-portable
+        run: zip -r "scratchpad-portable-${GITHUB_REF_NAME}.zip" scratchpad-portable
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "scratchpad-portable-${GITHUB_REF_NAME}.zip" --generate-notes
