@@ -99,7 +99,21 @@ async function startPixi() {
   document.addEventListener("themechange", draw);
 }
 
+function setupDownload() {
+  fetch("https://api.github.com/repos/iamtew/scratchpad-portable/releases/latest")
+    .then((r) => r.json())
+    .then((rel) => {
+      const zip = (rel.assets || []).find((a) => /\.zip$/i.test(a.name));
+      if (!zip) return;
+      document.querySelectorAll("[data-download]").forEach((a) => {
+        a.href = zip.browser_download_url;
+      });
+    })
+    .catch(() => {});
+}
+
 setupTheme();
 setupDialog();
 setupStub();
+setupDownload();
 startPixi();
