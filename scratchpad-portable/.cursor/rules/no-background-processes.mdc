@@ -1,0 +1,14 @@
+---
+description: Shut down test/verification servers and other background processes before finishing.
+alwaysApply: true
+---
+
+# No leftover processes
+
+Do not leave background processes running when work is done. HTTP servers started for testing or verification (dev servers, `python -m http.server`, preview, mock APIs) must be stopped before you finish.
+
+- Prefer one-shot checks that exit (tests, curl) over long-lived servers
+- If a server is required: start it, verify, then stop it
+- Stop it even if verification failed
+- Only kill processes this session started
+- Check the terminals this session owns before finishing
