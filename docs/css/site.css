@@ -181,43 +181,23 @@ body {
 
 .uc {
   justify-self: center;
-  position: relative;
-  overflow: hidden;
-  padding: 0.2em 0.35em;
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--bg);
-  -webkit-text-stroke: 0.7px var(--accent);
+  -webkit-text-stroke: 0.55px color-mix(in srgb, var(--accent) 28%, transparent);
   paint-order: stroke fill;
   text-decoration: none;
   opacity: 0;
-  filter: drop-shadow(0 0 4px var(--glow));
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--accent) 12%, transparent));
   animation:
     uc-in 1s ease 2s forwards,
     uc-glow 6s ease-in-out 3s infinite;
 }
 
-.uc::after {
-  content: "";
-  position: absolute;
-  top: -40%;
-  bottom: -40%;
-  left: 0;
-  width: 28%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--accent-hi) 80%, white),
-    transparent
-  );
-  transform: translateX(-140%) skewX(-18deg);
-  pointer-events: none;
-  animation: uc-scan 6s linear 3s infinite;
-}
-
 .uc:hover {
-  filter: drop-shadow(0 0 12px var(--accent-hi));
+  -webkit-text-stroke-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 35%, transparent));
 }
 
 @keyframes uc-in {
@@ -228,46 +208,12 @@ body {
 
 @keyframes uc-glow {
   0%,
-  12% {
-    filter: drop-shadow(0 0 4px var(--glow));
-  }
-
-  6% {
-    filter: drop-shadow(0 0 14px var(--accent-hi));
-  }
-
-  32% {
-    filter: drop-shadow(0 0 8px var(--accent));
-  }
-
-  52% {
-    filter: drop-shadow(0 0 3px var(--glow));
-  }
-
-  76% {
-    filter: drop-shadow(0 0 8px var(--accent));
-  }
-
   100% {
-    filter: drop-shadow(0 0 4px var(--glow));
-  }
-}
-
-@keyframes uc-scan {
-  0% {
-    transform: translateX(-140%) skewX(-18deg);
-    opacity: 1;
+    filter: drop-shadow(0 0 1px color-mix(in srgb, var(--accent) 8%, transparent));
   }
 
-  12% {
-    transform: translateX(380%) skewX(-18deg);
-    opacity: 0.35;
-  }
-
-  12.1%,
-  100% {
-    transform: translateX(-140%) skewX(-18deg);
-    opacity: 0;
+  50% {
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 28%, transparent));
   }
 }
 
@@ -583,13 +529,9 @@ code {
     animation: none;
   }
 
-  .uc,
-  .uc::after {
-    animation: none;
-  }
-
   .uc {
+    animation: none;
     opacity: 1;
-    filter: drop-shadow(0 0 6px var(--glow));
+    filter: drop-shadow(0 0 2px color-mix(in srgb, var(--accent) 12%, transparent));
   }
 }
