@@ -242,14 +242,9 @@ function mandala(PIXI, tex) {
   };
 }
 
-// Floor grid running at the camera, sun on the horizon, bokeh in the sky.
+// Floor and ceiling grids from one vanishing point. Floor is hue, ceiling is hue2.
 function horizon(PIXI, tex) {
   const root = new PIXI.Container();
-  const g = new PIXI.Graphics();
-  g.blendMode = "add";
-  root.addChild(g);
-  const sun = glowSprite(PIXI, tex);
-  root.addChild(sun);
   const sky = Array.from({ length: 16 }, () => {
     const s = glowSprite(PIXI, tex);
     s.u = Math.random();
@@ -260,29 +255,39 @@ function horizon(PIXI, tex) {
     root.addChild(s);
     return s;
   });
+  const g = new PIXI.Graphics();
+  g.blendMode = "add";
+  root.addChild(g);
+  const sun = glowSprite(PIXI, tex);
+  root.addChild(sun);
   let scroll = 0;
   return {
     root,
     update(t, w, h, dt, grade) {
       const yH = h * 0.46;
       const vx = w * (0.5 + Math.sin(t * 0.12) * 0.035);
-      const col = hsl(grade.hue, 78, 60);
-      const col2 = hsl(grade.hue2, 74, 64);
+      const floorCol = hsl(grade.hue, 78, 60);
+      const ceilCol = hsl(grade.hue2, 74, 64);
       scroll = rush(scroll, dt, grade);
       g.clear();
-      for (let i = 0; i <= 10; i++) {
-        const u = i / 10;
-        const x0 = vx + (u - 0.5) * w * 0.16;
-        const x1 = w / 2 + (u - 0.5) * w * 1.55;
-        glowLine(g, [x0, yH + 10, x1, h + 8], i % 2 ? col2 : col, 0.4, grade.bright * 0.85);
-      }
-      for (let i = 0; i < 9; i++) {
-        const z = (i / 9 + scroll) % 1;
-        const y = yH + fly(z) * (h * 1.04 - yH);
-        const spread = 0.06 + z * 0.92;
-        const fade = Math.sin(z * Math.PI);
-        glowLine(g, [w / 2 - spread * w * 0.78, y, w / 2 + spread * w * 0.78, y], col, 0.3 + z * 0.55, grade.bright * fade);
-      }
+      const drawGrid = (yNear, color) => {
+        const yFar = yNear > yH ? yH + 10 : yH - 10;
+        for (let i = 0; i <= 10; i++) {
+          const u = i / 10;
+          const x0 = vx + (u - 0.5) * w * 0.16;
+          const x1 = w / 2 + (u - 0.5) * w * 1.55;
+          glowLine(g, [x0, yFar, x1, yNear], color, 0.4, grade.bright * 0.85);
+        }
+        for (let i = 0; i < 9; i++) {
+          const z = (i / 9 + scroll) % 1;
+          const y = yH + fly(z) * (yNear - yH);
+          const spread = 0.06 + z * 0.92;
+          const fade = Math.sin(z * Math.PI);
+          glowLine(g, [w / 2 - spread * w * 0.78, y, w / 2 + spread * w * 0.78, y], color, 0.3 + z * 0.55, grade.bright * fade);
+        }
+      };
+      drawGrid(h + 8, floorCol);
+      drawGrid(-8, ceilCol);
       sun.x = vx;
       sun.y = yH;
       sun.tint = hsl(grade.hue2, 65, 74);
