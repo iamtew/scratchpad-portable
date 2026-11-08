@@ -289,11 +289,14 @@ Sources:
 
 Filter slowly.
 
-Move slowly.
+Move the level with the filter.
+Start low. Let it swell, then let it fall.
 
-Nobody should notice them.
+A noise bed can stay hidden.
+A pad is a chord. You should hear it on the way up.
+You should miss it when it is gone.
 
-Everyone should miss them when muted.
+An open saw with nowhere to go rings. Don't.
 
 ==================================================
 REVERB

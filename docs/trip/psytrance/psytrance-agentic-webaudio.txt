@@ -220,6 +220,8 @@ Example:
 30 breakdown
 90 final assault
 
+The pass this track actually plays is in the arrangement note.
+
 Every other agent reacts.
 
 This is how you get music that feels alive instead of a MIDI file trapped in a browser.

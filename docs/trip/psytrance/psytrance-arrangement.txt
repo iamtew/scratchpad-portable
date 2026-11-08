@@ -1,0 +1,44 @@
+THIS TRACK
+
+144 BPM. One pass. Six phrases, 16 bars each. Then it ends.
+
+The number on each phrase is energy, from 0 to 100.
+
+1  15   intro
+2  35   the roll, and the acid
+3  55   the lead joins
+4  85   climax
+5  30   breakdown
+6  90   final assault
+
+Tension is the last four bars of a phrase, and only when energy is already at 70.
+A drop is energy at 30 or under. The intro and the breakdown are both drops.
+
+==================================================
+WHO PLAYS
+==================================================
+
+Kick, and the three-note bass roll: the whole track.
+The roll opens only at the edge of a phrase.
+That rule is in the agent note.
+
+Acid: from phrase 2. Out for a drop.
+The squelch, the pattern, and the width are in the acid note.
+
+Lead: from phrase 3. Out for a drop.
+
+Hats: not during a drop.
+The ride waits until energy is at 70.
+The hat body is in the mix note.
+
+Pads: the whole time.
+They start almost silent and breathe across 32 bars, two phrases.
+The chord and that breath are in the mix note.
+
+==================================================
+DO NOT
+==================================================
+
+Do not thin the bass for eight bars and leave it there.
+Do not hide the pad in the noise bed.
+Do not open the pad and leave it open. That rings.
