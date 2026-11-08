@@ -139,26 +139,26 @@
   }
 
   function kick(t) {
+    // Sweep starts low. 180 Hz into the shaper is the click.
     const knock = ctx.createOscillator();
     knock.type = "sine";
-    knock.frequency.setValueAtTime(180, t);
-    knock.frequency.exponentialRampToValueAtTime(70, t + 0.04);
-    const kg = envGain(t, 0.45, 0.001, 0.15);
+    knock.frequency.setValueAtTime(110, t);
+    knock.frequency.exponentialRampToValueAtTime(56, t + 0.055);
+    const kg = envGain(t, 0.45, 0.004, 0.16);
     knock.connect(kg).connect(kickIn);
     knock.start(t);
-    knock.stop(t + 0.18);
+    knock.stop(t + 0.2);
 
-    // Sub tail. The knock is gone by 150 ms; this is the weight under it.
+    // Sub tail. The knock is gone by 170 ms; this is the weight under it.
     const sub = ctx.createOscillator();
     sub.type = "sine";
-    sub.frequency.setValueAtTime(90, t);
+    sub.frequency.setValueAtTime(70, t);
     sub.frequency.exponentialRampToValueAtTime(46, t + 0.08);
-    const sg = envGain(t, 0.5, 0.001, 0.3);
+    const sg = envGain(t, 0.5, 0.004, 0.3);
     sub.connect(sg).connect(kickIn);
     sub.start(t);
     sub.stop(t + 0.34);
 
-    noiseBurst(t, sum, 0.04, 0.001, 0.01, "bandpass", 1800, 0.7);
     lastKickTime = t;
   }
 
@@ -366,25 +366,32 @@
   }
 
   function wireBus() {
-    // Soft clip the sum, then take the fizz off. Volume stays on master.
+    // The curve clamps past ±1. Trim first, glue, then makeup. That clamp is the clip.
     sum = ctx.createGain();
+    sum.gain.value = 0.55;
     const glue = ctx.createWaveShaper();
     glue.curve = shaperCurve(0.4);
     glue.oversample = "2x";
+    const makeup = ctx.createGain();
+    makeup.gain.value = 1.35;
     const air = ctx.createBiquadFilter();
     air.type = "highshelf";
     air.frequency.value = 7500;
     air.gain.value = -3;
     master = ctx.createGain();
     master.gain.value = volume;
-    sum.connect(glue).connect(air).connect(master).connect(ctx.destination);
+    sum.connect(glue).connect(makeup).connect(air).connect(master).connect(ctx.destination);
 
-    // Kick body only. The click stays on the sum so saturation does not sharpen it.
+    // Kick body only. Lowpass after the shaper, or the warmth comes out as a tick.
     kickIn = ctx.createGain();
+    kickIn.gain.value = 0.55;
     const kickWarm = ctx.createWaveShaper();
     kickWarm.curve = shaperCurve(0.25);
     kickWarm.oversample = "2x";
-    kickIn.connect(kickWarm).connect(sum);
+    const kickBody = ctx.createBiquadFilter();
+    kickBody.type = "lowpass";
+    kickBody.frequency.value = 200;
+    kickIn.connect(kickWarm).connect(kickBody).connect(sum);
 
     bassFilter = ctx.createBiquadFilter();
     bassFilter.type = "lowpass";

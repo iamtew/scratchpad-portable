@@ -19,13 +19,10 @@ Body:
 - its own soft saturation, oversampled
 - warm the kick here
 
-Click:
-- one short bandpass tick
-- quiet
-- leave it off the kick saturator
-
-Saturation on the tick turns it into hash, and then the click is the whole kick.
-If the click is the first thing you hear, it is too loud.
+The click is the top of that sweep, not a separate noise tick.
+Start it nearer 100 Hz than 200 Hz.
+Lowpass the kick after its saturator, or the new harmonics become the click.
+If the click is the first thing you hear, the sweep is still too high.
 The chest hit is the body.
 
 Keep the kick short enough that the offbeat bass still fits after it.
@@ -121,7 +118,10 @@ MASTER
 ==================================================
 
 Leave headroom.
-The destination clips hard, and hard clipping sounds thin.
+The shaper curve clamps anything past full scale, and that clamp is the clip.
+Turn the sum down before the glue, then makeup after it.
+The level comes back. The flat top does not.
+The destination clips hard too, and that also sounds thin.
 
 No bus compressor at this tempo.
 It pumps on every kick and the body disappears.
