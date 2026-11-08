@@ -22,9 +22,9 @@ Kick, and the three-note bass roll: the whole track.
 The roll opens only at the edge of a phrase.
 That rule is in the agent note.
 
-Acid: from phrase 2. Out for a drop.
+Acid: the lead from phrase 2. Out for a drop.
 The squelch, the pattern, and the width are in the acid note.
-The driver is the other acid, same phrase, under the lead.
+The driver starts in the intro. Out for the breakdown.
 
 Lead: from phrase 3. Out for a drop.
 

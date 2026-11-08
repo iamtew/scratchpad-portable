@@ -81,25 +81,27 @@
     send: 0.14,
     haas: 0.014,
   };
+  // Resting cutoff stays above the highpass. A floor on the highpass leaves the tick silent.
   const DRIVE_MOD = {
     ride: Math.PI,
-    env: 180,
-    span: 700,
-    base: 280,
+    env: 220,
+    span: 1100,
+    base: 780,
     drift: 40,
     accent: 1.2,
-    decay: 0.02,
-    decayAccent: 0.035,
-    q: 9,
-    qTension: 11,
-    level: 0.03,
-    levelAccent: 0.048,
+    decay: 0.05,
+    decayAccent: 0.07,
+    q: 11,
+    qTension: 13,
+    level: 0.06,
+    levelAccent: 0.085,
     lfo: 0.07,
     lfoDepth: 60,
     drive: 0.4,
-    hp: 240,
+    hp: 200,
     send: 0.05,
     haas: 0,
+    fromStart: true,
   };
 
   // Accents stay off the kick. A slide needs a next note to land on.
@@ -332,7 +334,9 @@
 
   function playAcid(v, pattern, mod, t, c) {
     const cell = pattern[c.sixteenth];
-    if (!cell || c.energy < 35 || c.drop) {
+    // The driver is in the intro. The breakdown is the drop it still sits out.
+    const quiet = mod.fromStart ? c.drop && c.phrase !== 0 : c.energy < 35 || c.drop;
+    if (!cell || quiet) {
       v.amp.gain.cancelScheduledValues(t);
       v.amp.gain.setTargetAtTime(0.0001, t, 0.02);
       v.held = false;

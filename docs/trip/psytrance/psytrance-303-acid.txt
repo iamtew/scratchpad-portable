@@ -100,20 +100,22 @@ The octave is step 12. That step is the kick, so it does not chirp.
 
 The ride is the same 32 bars, half a cycle later.
 When the lead is open, this one is dull.
-The chirp is short. It ticks. It does not scream.
+The chirp is shorter than the lead. The note still keeps a body.
+The resting cutoff stays above the highpass. On the highpass, the tick disappears.
 
 Resonance stays lower. The shaper stays cooler.
-Highpass a little higher, so it does not sit on the lead.
+Highpass just above the lead's, so it does not sit on the kick.
 Almost none of it goes to the delay.
 It stays in the center. The lead keeps the width.
-Quieter than the lead.
+Loud enough to follow. The open lead is still the louder squelch.
 
 ==================================================
 WHERE IT PLAYS
 ==================================================
 
-Not in the intro.
+The lead acid is not in the intro.
 Not in the breakdown.
 
-The kick and the bass have to be obvious before either line starts.
-Both use that gate. The driver stays under the lead.
+The driver starts with the intro.
+It still leaves for the breakdown.
+The kick and the bass are already going. The driver is the first acid.
