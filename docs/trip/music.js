@@ -5,8 +5,17 @@
   const EIGHTH = 60 / BPM / 2;
   const LOOKAHEAD_MS = 25;
   const SCHEDULE_AHEAD = 0.12;
-  // 16-bar phrases. Climax then breakdown is the drop.
-  const PHRASE_ENERGY = [15, 35, 55, 85, 30, 90];
+  // One pass. Intro is 8 bars; the rest are 16. Then the track ends.
+  const PHRASES = [
+    { bars: 8, energy: 15 },
+    { bars: 16, energy: 35 },
+    { bars: 16, energy: 55 },
+    { bars: 16, energy: 85 },
+    { bars: 16, energy: 30 },
+    { bars: 16, energy: 90 },
+  ];
+  const TOTAL_BARS = PHRASES.reduce((n, p) => n + p.bars, 0);
+  const TOTAL_STEPS = TOTAL_BARS * 16;
   const BASS_MASKS = [
     [0, 1, 1, 1],
     [0, 1, 1, 0],
@@ -37,6 +46,8 @@
   let volume = 0.7;
   let muted = false;
   let lastKickTime = 0;
+  let ended = false;
+  let onEnded = null;
 
   function fillNoise(d, pink) {
     let b0 = 0;
@@ -96,9 +107,20 @@
 
   function clock(s) {
     const bar = Math.floor(s / 16);
-    const phrase = Math.floor(bar / 16) % PHRASE_ENERGY.length;
-    const barInPhrase = bar % 16;
-    const energy = PHRASE_ENERGY[phrase];
+    let acc = 0;
+    let phrase = 0;
+    let energy = PHRASES[0].energy;
+    let barInPhrase = bar;
+    for (let i = 0; i < PHRASES.length; i++) {
+      const p = PHRASES[i];
+      if (bar < acc + p.bars) {
+        phrase = i;
+        energy = p.energy;
+        barInPhrase = bar - acc;
+        break;
+      }
+      acc += p.bars;
+    }
     const tension = energy >= 70 && barInPhrase >= 12;
     return {
       s,
@@ -265,12 +287,43 @@
   }
 
   function tick() {
+    if (!ctx || ended) return;
     while (nextTime < ctx.currentTime + SCHEDULE_AHEAD) {
+      if (step >= TOTAL_STEPS) {
+        finish();
+        return;
+      }
       schedule(step, nextTime);
       step += 1;
       nextTime += SIXTEENTH;
     }
     timer = setTimeout(tick, LOOKAHEAD_MS);
+  }
+
+  function stop() {
+    const wasLive = !!ctx;
+    clearTimeout(timer);
+    timer = 0;
+    const dying = ctx;
+    ctx = null;
+    master = null;
+    lastKickTime = -99;
+    if (dying) dying.close();
+    if (wasLive && !ended) {
+      ended = true;
+      if (onEnded) onEnded();
+    }
+  }
+
+  function finish() {
+    if (ended) return;
+    ended = true;
+    if (master && ctx) master.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
+    const cb = onEnded;
+    setTimeout(() => {
+      stop();
+      if (cb) cb();
+    }, 280);
   }
 
   function applyGain() {
@@ -335,18 +388,24 @@
 
   async function start() {
     if (ctx) return;
+    ended = false;
+    step = 0;
+    lastKickTime = 0;
     ctx = new AudioContext();
     noiseBuf = noiseBuffer(0.25, false);
     atmoBuf = noiseBuffer(2, true);
     wireBus();
     await ctx.resume();
     nextTime = ctx.currentTime + 0.05;
-    step = 0;
     tick();
   }
 
   global.TripMusic = {
     start,
+    stop,
+    set onEnded(fn) {
+      onEnded = fn;
+    },
     setVolume(v) {
       volume = Math.max(0, Math.min(1, Number(v)));
       applyGain();
@@ -363,6 +422,12 @@
     },
     get currentTime() {
       return ctx ? ctx.currentTime : 0;
+    },
+    get progress() {
+      return Math.min(1, step / TOTAL_STEPS);
+    },
+    get ended() {
+      return ended;
     },
   };
 })(window);

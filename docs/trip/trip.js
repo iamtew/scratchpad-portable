@@ -20,8 +20,11 @@ function ngon(g, cx, cy, r, n, rot) {
   g.poly(pts);
 }
 
+let pixiStarted = false;
+
 async function startPixi() {
-  if (!window.PIXI) return;
+  if (!window.PIXI || pixiStarted) return;
+  pixiStarted = true;
   const canvas = document.getElementById("pixi");
   const app = new PIXI.Application();
   await app.init({
@@ -128,15 +131,39 @@ function setupAudioUi() {
   });
 }
 
+function resetToBegin() {
+  const gate = document.querySelector(".gate");
+  const bar = document.querySelector(".bar");
+  const begin = document.getElementById("begin");
+  const prog = document.getElementById("prog");
+  bar.hidden = true;
+  gate.hidden = false;
+  gate.classList.remove("fade");
+  begin.disabled = false;
+  prog.value = 0;
+  document.title = "Are you ready?";
+}
+
+function watchProgress() {
+  const music = window.TripMusic;
+  const prog = document.getElementById("prog");
+  if (music.ended) return;
+  prog.value = music.progress;
+  requestAnimationFrame(watchProgress);
+}
+
 function setupBegin() {
   const gate = document.querySelector(".gate");
   const bar = document.querySelector(".bar");
   const begin = document.getElementById("begin");
   const vol = document.getElementById("vol");
+  window.TripMusic.onEnded = resetToBegin;
   begin.addEventListener("click", async () => {
     begin.disabled = true;
     await window.TripMusic.start();
     window.TripMusic.setVolume(vol.value);
+    document.getElementById("prog").value = 0;
+    watchProgress();
     gate.classList.add("fade");
     startPixi();
     setTimeout(() => {
