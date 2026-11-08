@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Are you ready?</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <canvas id="pixi" aria-hidden="true"></canvas>
+
+    <header class="bar" hidden>
+      <a class="home" href="../">
+        <span class="icon icon-back" aria-hidden="true"></span>
+        Home
+      </a>
+      <div class="audio">
+        <button type="button" id="mute" aria-pressed="false" aria-label="Mute">
+          <span class="icon icon-vol" aria-hidden="true"></span>
+          <span class="icon icon-vol-off" aria-hidden="true"></span>
+        </button>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Volume">
+      </div>
+    </header>
+
+    <div class="gate">
+      <button type="button" class="begin" id="begin">Begin</button>
+    </div>
+
+    <script src="../vendor/pixi/pixi.min.js"></script>
+    <script src="music.js"></script>
+    <script src="trip.js"></script>
+  </body>
+</html>
