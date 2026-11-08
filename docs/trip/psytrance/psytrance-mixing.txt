@@ -1,0 +1,139 @@
+MIXING PSYTRANCE
+
+The other two notes are the machines.
+This one is the mix: who owns which band, and where the saturation goes.
+
+The kick and the bass are the engine.
+Get those obvious with everything else muted.
+Leads, hats, and delays decorate the engine. They do not get to move it.
+
+==================================================
+KICK
+==================================================
+
+Body and click are different jobs.
+
+Body:
+- sine sweep down into the sub
+- a longer sine under it, so the downbeat is a thump and not a hole
+- its own soft saturation, oversampled
+- warm the kick here
+
+Click:
+- one short bandpass tick
+- quiet
+- leave it off the kick saturator
+
+Saturation on the tick turns it into hash, and then the click is the whole kick.
+If the click is the first thing you hear, it is too loud.
+The chest hit is the body.
+
+Keep the kick short enough that the offbeat bass still fits after it.
+Target is THUMP, not BOOOOM.
+
+==================================================
+BASS
+==================================================
+
+A filtered saw has almost no fundamental.
+Saturating that only makes more fizz.
+
+Order:
+
+sine at the note
++ detuned saws
+→ lowpass
+→ waveshaper
+→ a little EQ
+
+The sine is what the shaper warms.
+Oversample the shaper, or the new harmonics alias and the bass goes thin again.
+
+A small cut around 250-450 Hz keeps the mud out.
+Do not cut so hard that you scoop the warmth you just added.
+
+Target is still TOK, not WUB.
+If the bass already toks, leave it alone.
+
+==================================================
+LEADS
+==================================================
+
+Same hole, higher up.
+A lone square is a whistle. It has no body, so it sounds thin beside the engine.
+
+- saw, not square
+- a quiet sine at the same note, into the same lowpass
+- that sine is body in the mids, not a second bass in the sub
+- a small saturator after the filter
+- that saturator feeds the dry mix and the delay, so the echoes are not harsher than the note
+
+Keep the cutoff moving.
+The riff stays small. Full-on is da-da-da, not a hook.
+
+Do not lowpass the lead down into the bass to make it "warm".
+Bright and resonant is the point. Warmth is the fundamental plus a little saturation.
+
+Lasers stay a fast pew into the delay.
+They are not leads. Do not give them a body.
+
+==================================================
+TOP
+==================================================
+
+Hats and rides live above the lead.
+Highpass them so they stay hats.
+
+A high shelf on the mix, a few dB down around 7-8 kHz, takes the fizz off after the saturators.
+Do not cut so hard that the hats disappear.
+
+==================================================
+DELAY
+==================================================
+
+Sync it to the tempo.
+Highpass the return around 200-400 Hz.
+
+Low notes repeating in the delay make the engine muddy.
+Leads and zaps go to the delay.
+The kick and the bass do not.
+
+==================================================
+SATURATION
+==================================================
+
+A little, in a few places.
+
+- kick body
+- bass
+- lead
+- one gentle stage on the whole sum
+
+Oversample each one.
+Drive none of them hard.
+
+One master distortion, slammed by the kick, makes the bass and the lead pump.
+The kick already has its own shaper.
+The master stage only glues.
+
+==================================================
+MASTER
+==================================================
+
+Leave headroom.
+The destination clips hard, and hard clipping sounds thin.
+
+No bus compressor at this tempo.
+It pumps on every kick and the body disappears.
+
+Volume sits after the glue, so mute and the end fade still work.
+
+==================================================
+CHECK
+==================================================
+
+Kick: thump, then a small tick. Not the other way around.
+Bass: tok between the kicks.
+Lead: warm enough to sit in the mids, and it loses a fight with the kick.
+Highs are present and not in charge.
+The loudest peak stays under full scale.

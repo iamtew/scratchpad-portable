@@ -1,0 +1,224 @@
+Psytrance is not "write a melody."
+
+Psytrance is "run several synchronized machines that mutate over time."
+
+Think agents, not notes.
+
+CORE SYSTEM
+
+BPM: 138-148
+Full-on sweet spot: 142-145
+
+Every 16th note is sacred.
+
+1 e & a 2 e & a 3 e & a 4 e & a
+K   B B B K   B B B K   B B B K   B B B
+
+- K = kick
+- B = offbeat bass
+
+The kick and bass are the engine. Everything else decorates it.
+
+AGENT 1: KICK GENERATOR
+
+Never improvise.
+
+every quarter note:
+    playKick()
+
+Characteristics:
+- pitch sweep downward
+- 50-60 Hz body
+- short click attack
+- 100-150ms tail
+
+The kick is a metronome that punches you in the chest.
+
+AGENT 2: BASS GENERATOR
+
+Bass happens between kicks.
+
+for each 16th note:
+    if not kick:
+        playBass()
+
+Typical note length:
+1/16 minus a tiny gap
+
+Example:
+Kick - Bass Bass Bass
+Kick - Bass Bass Bass
+
+Oscillator:
+sawtooth
+
+Processing:
+LPF → distortion → EQ → compression
+
+The bass should sound slightly angry.
+
+Not metal angry.
+
+"Someone stole my sandwich at a festival" angry.
+
+AGENT 3: BASS MUTATION AGENT
+
+Without mutation psytrance becomes Excel.
+
+Every 8 or 16 bars:
+- change filter cutoff
+- change distortion amount
+- change note pattern
+
+Small changes.
+
+Listeners love evolution.
+Listeners hate noticing the evolution.
+
+AGENT 4: PERCUSSION SWARM
+
+Runs independently.
+
+Produces:
+- hats
+- shakers
+- rides
+- glitches
+
+Rules:
+70% predictable
+30% surprise
+
+Humans detect patterns.
+Humans enjoy broken patterns.
+
+AGENT 5: ATMOSPHERE GENERATOR
+
+Long delays.
+Long reverbs.
+Noise textures.
+Filtered field recordings.
+Granular weirdness.
+
+Examples:
+- wind
+- radio chatter
+- synth pads
+- bird sounds from another dimension
+
+Should be felt more than heard.
+
+AGENT 6: PSY LEAD INTELLIGENCE
+
+Creates tiny motifs.
+
+Not big EDM hooks.
+
+A psy lead often sounds like:
+da-da-da
+ da-da-da-da
+ da-da
+
+Then:
+- filter modulation
+- delay feedback modulation
+- wavetable position modulation
+- stereo movement
+
+One note can sound alive for 30 seconds.
+
+AGENT 7: MODULATION BRAIN
+
+The genre is obsessed with motion.
+
+Attach LFOs everywhere.
+
+- filter cutoff
+- pan
+- noise amount
+- delay time
+- reverb send
+- distortion mix
+- wavetable index
+
+Nothing should sit completely still.
+
+Ever.
+
+AGENT 8: TENSION BUILDER
+
+Every 16-32 bars:
+increase excitement
+
+Methods:
+- open filter
+- add percussion
+- increase delays
+- automate resonance
+- add risers
+
+Then:
+remove everything
+
+Drop back into kick+bass.
+
+Monkey brain happy.
+
+FULL-ON PSYTRANCE SPECIFIC
+
+Compared to darkpsy:
+- brighter
+- cleaner
+- more melodic
+- more major scales
+- more obvious riffs
+
+Examples:
+- Astrix
+- Talamasca
+- Vibe Tribe
+- 1200 Micrograms
+
+The lead carries more of the track.
+
+The groove is less "forest ritual" and more "space carnival."
+
+WEBAUDIO ARCHITECTURE
+
+Don't build tracks.
+
+Build agents.
+
+ClockAgent
+KickAgent
+BassAgent
+PercussionAgent
+AtmosphereAgent
+LeadAgent
+FXAgent
+ArrangementAgent
+
+Each subscribes to:
+- currentBar
+- currentBeat
+- currentPhrase
+- energyLevel
+
+ArrangementAgent becomes the conductor:
+energy = 0..100
+
+Example:
+0-20 intro
+20-40 groove
+40-70 development
+70-100 climax
+30 breakdown
+90 final assault
+
+Every other agent reacts.
+
+This is how you get music that feels alive instead of a MIDI file trapped in a browser.
+
+The rookie mistake is generating notes.
+
+The psytrance approach is generating behaviors. The notes are just a side effect.

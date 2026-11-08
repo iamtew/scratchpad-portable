@@ -1,0 +1,357 @@
+PSYTRANCE SOUND DESIGN FOR WEBAUDIO
+
+The biggest mistake is making synthesizer sounds.
+
+Psytrance is mostly envelope design and motion.
+
+If the envelopes are right, almost any oscillator works.
+
+==================================================
+KICK
+==================================================
+
+Purpose:
+Creates the pulse and occupies the sub region.
+
+Recipe:
+
+Oscillator:
+- sine
+
+Pitch envelope:
+- start: 150-250 Hz
+- end: 50-60 Hz
+- decay: 30-50 ms
+
+Amplitude envelope:
+- attack: 0 ms
+- decay: 120-180 ms
+- sustain: 0
+- release: 0
+
+Layer:
+- short click
+- noise burst
+- highpassed transient
+
+Target sound:
+THUMP
+not
+BOOOOM
+
+The kick should be short enough that three bass notes can comfortably fit after it.
+
+==================================================
+BASS
+==================================================
+
+Purpose:
+Machine gun between kicks.
+
+Oscillator:
+- sawtooth
+or
+- two detuned saws
+
+Filter:
+- lowpass 150-500 Hz
+- resonance low
+
+Envelope:
+- attack 0 ms
+- decay 50-120 ms
+- sustain 0
+
+Effects:
+- saturation
+- clipper
+- compressor
+
+Target sound:
+TOK
+TOK
+TOK
+
+Not:
+WUB
+WUB
+WUB
+
+If the bass sounds like dubstep, you've failed.
+
+==================================================
+OFFBEAT BASS CHARACTER
+==================================================
+
+A good psy bass sounds like:
+
+rubber
+wood
+laser
+
+at the same time.
+
+Try:
+
+saw -> filter -> waveshaper -> EQ
+
+Boost:
+- 80-120 Hz
+
+Cut:
+- muddy 250-450 Hz
+
+==================================================
+HIHATS
+==================================================
+
+Closed Hat
+
+Source:
+- white noise
+
+Filter:
+- highpass 6-10 kHz
+
+Envelope:
+- attack 0
+- decay 10-30 ms
+
+Target:
+TSS
+
+Open Hat
+
+Same source.
+
+Longer envelope:
+- 100-250 ms
+
+Target:
+TSHHHH
+
+==================================================
+SHAKERS
+==================================================
+
+White noise.
+
+Bandpass around:
+- 4-8 kHz
+
+Random volume modulation.
+
+Humans are bad at playing identical shakers.
+
+Your code should be too.
+
+==================================================
+RIDE
+==================================================
+
+Mix:
+- filtered noise
+- metallic FM tone
+
+Long decay.
+
+Placed during high energy sections.
+
+Target:
+shimmer
+not
+crash cymbal.
+
+==================================================
+PSY LEAD
+==================================================
+
+This is where people usually overcomplicate things.
+
+Start simple.
+
+Oscillator:
+- saw
+- square
+- wavetable
+
+Filter:
+- 12 dB or 24 dB lowpass
+
+Effects:
+- stereo delay
+- reverb
+- phaser
+- flanger
+
+Movement:
+- LFO on cutoff
+- LFO on wavetable position
+- LFO on stereo width
+
+The note is boring.
+
+The movement is interesting.
+
+==================================================
+GOA STYLE LEAD
+==================================================
+
+Bright.
+
+Resonant.
+
+Acid-adjacent.
+
+Try:
+
+saw -> resonant LPF -> delay
+
+Automate:
+- resonance
+- cutoff
+
+Constantly.
+
+==================================================
+FM PSY NOISES
+==================================================
+
+Many psychedelic sounds are FM accidents.
+
+Carrier:
+- sine
+
+Modulator:
+- sine
+
+Ratio examples:
+- 2:1
+- 3:1
+- 5:1
+- 7:1
+
+Automate modulation index.
+
+Unexpected squealing is often success.
+
+==================================================
+LASERS
+==================================================
+
+Oscillator:
+- triangle
+- sine
+
+Pitch envelope:
+- extremely fast
+
+Example:
+
+1800 Hz
+->
+300 Hz
+
+within
+
+30 ms
+
+Result:
+pew
+
+==================================================
+ALIEN BLOBS
+==================================================
+
+Oscillator:
+- sine
+
+Route into:
+- waveshaper
+- resonant filter
+
+Randomly modulate:
+- cutoff
+- pitch
+- distortion
+
+The best psy noises sound slightly broken.
+
+==================================================
+ATMOSPHERES
+==================================================
+
+Sources:
+- pink noise
+- field recordings
+- pads
+- granular textures
+
+Filter slowly.
+
+Move slowly.
+
+Nobody should notice them.
+
+Everyone should miss them when muted.
+
+==================================================
+REVERB
+==================================================
+
+Keep low frequencies out.
+
+Highpass:
+- 200-400 Hz
+
+Psytrance reverbs are bright.
+
+Mud kills speed.
+
+==================================================
+DELAY
+==================================================
+
+Arguably more important than reverb.
+
+Sync to tempo.
+
+Common values:
+- 1/8
+- 1/8 dotted
+- 1/16
+
+Automate feedback.
+
+==================================================
+DISTORTION
+==================================================
+
+Used everywhere.
+
+Kick.
+Bass.
+Leads.
+Effects.
+
+Usually less than beginners think.
+
+Tiny saturation repeated 20 times beats one gigantic distortion stage.
+
+==================================================
+MASTER FEELING
+==================================================
+
+If everything sounds clean and static:
+wrong.
+
+If everything sounds distorted chaos:
+also wrong.
+
+The feeling you're aiming for is:
+
+precise machinery
++
+controlled hallucination
+
+That's full-on psytrance.
