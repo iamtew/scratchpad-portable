@@ -63,6 +63,68 @@ function glowSprite(PIXI, tex) {
   return s;
 }
 
+// Two offset glows so a cloud is a lump, not a disk.
+function cloudTexture(PIXI, size = 256) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  ctx.globalCompositeOperation = "lighter";
+  const r = size / 2;
+  for (const [ox, oy] of [[-0.14, -0.1], [0.16, 0.12]]) {
+    const grd = ctx.createRadialGradient(r + ox * r, r + oy * r, 0, r, r, r * 0.92);
+    grd.addColorStop(0, "rgba(255,255,255,0.55)");
+    grd.addColorStop(0.35, "rgba(255,255,255,0.18)");
+    grd.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, size, size);
+  }
+  return PIXI.Texture.from(c);
+}
+
+// Faint gas under every scene. Half drifts, half rushes past.
+function vapour(PIXI, tex) {
+  const root = new PIXI.Container();
+  const ps = [];
+  for (let i = 0; i < 28; i++) {
+    const s = glowSprite(PIXI, tex);
+    s.smoke = i < 14;
+    s.z = Math.random();
+    s.u = Math.random();
+    s.v = Math.random();
+    s.ph = rand(0, 6.28);
+    s.base = rand(2.2, 4.8);
+    s.alpha0 = rand(0.04, 0.1);
+    s.pair = i % 2;
+    s.rot0 = rand(0, Math.PI);
+    root.addChild(s);
+    ps.push(s);
+  }
+  return {
+    root,
+    update(t, w, h, dt, grade) {
+      const cx = w / 2;
+      const cy = h / 2;
+      for (const s of ps) {
+        s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 70, 58);
+        if (s.smoke) {
+          s.x = s.u * w + Math.sin(t * 0.08 + s.ph) * w * 0.08;
+          s.y = s.v * h + Math.cos(t * 0.06 + s.ph) * h * 0.06;
+          s.scale.set(s.base * (1.1 + Math.sin(t * 0.15 + s.ph) * 0.2));
+          s.alpha = s.alpha0 * grade.bright * (0.45 + 0.25 * Math.sin(t * 0.2 + s.ph));
+          s.rotation = s.rot0 + t * 0.03;
+        } else {
+          s.z = rush(s.z, dt * 0.35, grade);
+          const lift = fly(s.z);
+          s.x = cx + (s.u - 0.5) * w * (0.15 + lift * 1.1);
+          s.y = cy + (s.v - 0.5) * h * (0.15 + lift * 1.1);
+          s.scale.set(s.base * (0.4 + lift * 1.4));
+          s.alpha = s.alpha0 * grade.bright * (0.15 + 0.7 * Math.sin(s.z * Math.PI));
+        }
+      }
+    },
+  };
+}
+
 // Forward travel. z 0 is far (small, at the center), z 1 has passed the camera.
 // About 3 seconds to cross at mid energy. Reduced motion passes dt 0, so it holds.
 function rush(z, dt, grade) {
@@ -453,6 +515,8 @@ async function startPixi() {
   });
 
   const tex = glowTexture(PIXI);
+  const mist = vapour(PIXI, cloudTexture(PIXI));
+  app.stage.addChild(mist.root);
   const w0 = app.screen.width || innerWidth;
   const h0 = app.screen.height || innerHeight;
   // Order is the 8-bar cycle. Hue changes with the block, so a repeat is a new grade.
@@ -487,6 +551,7 @@ async function startPixi() {
     const ease = reduceMotion ? 1 : Math.min(1, dt * 4.5);
     const active = grade.section % scenes.length;
     const { width: w, height: h } = app.screen;
+    mist.update(t, w, h, dt, grade);
     for (let i = 0; i < scenes.length; i++) {
       const s = scenes[i];
       const target = i === active ? 1 : 0;
