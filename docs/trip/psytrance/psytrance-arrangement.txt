@@ -1,6 +1,6 @@
 THIS TRACK
 
-144 BPM. One pass. Six phrases, 16 bars each. Then it ends.
+144 BPM. One pass. Six phrases, 16 bars each, then an 8-bar outro.
 
 The number on each phrase is energy, from 0 to 100.
 
@@ -10,6 +10,7 @@ The number on each phrase is energy, from 0 to 100.
 4  85   climax
 5  30   breakdown
 6  90   final assault
+7  90   outro, 8 bars
 
 Tension is the last four bars of a phrase, and only when energy is already at 70.
 A drop is energy at 30 or under. The intro and the breakdown are both drops.
@@ -22,11 +23,11 @@ Kick, and the three-note bass roll: the whole track.
 The roll opens only at the edge of a phrase.
 That rule is in the agent note.
 
-Acid: the lead from phrase 2. Out for a drop.
+Acid: the lead from phrase 2. Out for a drop, and out for the outro.
 The squelch, the pattern, and the width are in the acid note.
-The driver starts in the intro, and it stays through the breakdown.
+The driver starts in the intro, stays through the breakdown, and stays for the outro.
 
-Lead: from phrase 3. Out for a drop.
+Lead: from phrase 3. Out for a drop, and out for the outro.
 
 Hats: not during a drop.
 The ride waits until energy is at 70.

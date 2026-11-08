@@ -5,7 +5,7 @@
   const EIGHTH = 60 / BPM / 2;
   const LOOKAHEAD_MS = 25;
   const SCHEDULE_AHEAD = 0.12;
-  // One pass. Each phrase is 16 bars. Then the track ends.
+  // One pass. Six phrases of 16 bars, then an 8-bar outro.
   const PHRASES = [
     { bars: 16, energy: 15 },
     { bars: 16, energy: 35 },
@@ -13,6 +13,7 @@
     { bars: 16, energy: 85 },
     { bars: 16, energy: 30 },
     { bars: 16, energy: 90 },
+    { bars: 8, energy: 90, outro: true },
   ];
   const TOTAL_BARS = PHRASES.reduce((n, p) => n + p.bars, 0);
   const TOTAL_STEPS = TOTAL_BARS * 16;
@@ -234,12 +235,14 @@
     let phrase = 0;
     let energy = PHRASES[0].energy;
     let barInPhrase = bar;
+    let outro = false;
     for (let i = 0; i < PHRASES.length; i++) {
       const p = PHRASES[i];
       if (bar < acc + p.bars) {
         phrase = i;
         energy = p.energy;
         barInPhrase = bar - acc;
+        outro = !!p.outro;
         break;
       }
       acc += p.bars;
@@ -255,6 +258,7 @@
       energy,
       tension,
       drop: energy <= 30,
+      outro,
     };
   }
 
@@ -340,8 +344,8 @@
 
   function playAcid(v, pattern, mod, t, c) {
     const cell = pattern[c.sixteenth];
-    // The driver plays the intro and the breakdown. The lead acid still waits.
-    const quiet = mod.fromStart ? false : c.energy < 35 || c.drop;
+    // The driver plays the whole track. The lead acid waits, and it sits out the outro.
+    const quiet = mod.fromStart ? false : c.energy < 35 || c.drop || c.outro;
     if (!cell || quiet) {
       v.amp.gain.cancelScheduledValues(t);
       v.amp.gain.setTargetAtTime(0.0001, t, 0.02);
@@ -381,7 +385,7 @@
         env *= open;
       }
       // Lead acid is in. Darken the driver so it stays behind that line.
-      if (mod.tuck && c.energy >= 35 && !c.drop) {
+      if (mod.tuck && c.energy >= 35 && !c.drop && !c.outro) {
         base *= mod.tuck;
         env *= mod.tuck;
       }
@@ -463,7 +467,7 @@
   }
 
   function lead(t, c) {
-    if (c.energy < 45 || c.drop) return;
+    if (c.energy < 45 || c.drop || c.outro) return;
     const sixteenth = c.sixteenth;
     const motifA = sixteenth === 4 || sixteenth === 5 || sixteenth === 6;
     const motifB = sixteenth >= 8 && sixteenth <= 11 && c.energy > 55;
