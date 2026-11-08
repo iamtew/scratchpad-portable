@@ -41,6 +41,25 @@
     [5, 1, 0],
     [7, 0, 0],
   ];
+  // Same shape as ACID. A few pitches move. Rests and accents stay put.
+  const ACID_B = [
+    [0, 0, 1],
+    [7, 1, 0],
+    [10, 0, 1],
+    [3, 0, 0],
+    null,
+    [0, 0, 1],
+    [5, 1, 0],
+    [3, 0, 1],
+    [12, 0, 0],
+    [7, 1, 0],
+    null,
+    [3, 0, 1],
+    [7, 0, 0],
+    [0, 0, 1],
+    [10, 1, 0],
+    [5, 0, 0],
+  ];
   // Driving acid. du = root, da = fifth, dee = octave. No slides, no rests.
   // Accents stay off the kick. The octave does not chirp on the downbeat.
   const DRIVE = [
@@ -122,7 +141,12 @@
     }
     return true;
   }
-  if (!acidPatternOk(ACID) || !acidPatternOk(DRIVE)) throw new Error("acid pattern");
+  if (!acidPatternOk(ACID) || !acidPatternOk(ACID_B) || !acidPatternOk(DRIVE)) throw new Error("acid pattern");
+
+  function leadAcidPattern(bar) {
+    // Two bars of the first pattern, two of the variation, then repeat.
+    return Math.floor(bar / 2) % 2 === 0 ? ACID : ACID_B;
+  }
 
   let ctx;
   let sum;
@@ -554,7 +578,7 @@
     const c = clock(s);
     if (c.beat16 === 0) kick(t);
     bass(t, c);
-    playAcid(leadAcid, ACID, LEAD_MOD, t, c);
+    playAcid(leadAcid, leadAcidPattern(c.bar), LEAD_MOD, t, c);
     playAcid(driveAcid, DRIVE, DRIVE_MOD, t, c);
     hats(t, c);
     ride(t, c);
