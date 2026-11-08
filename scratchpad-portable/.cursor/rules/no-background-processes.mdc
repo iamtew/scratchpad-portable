@@ -8,6 +8,5 @@ alwaysApply: true
 Do not leave background processes running when work is done. If this session started one, stop it before finishing (even if verification failed).
 
 - Prefer one-shot checks that exit (tests, curl) over long-lived servers
-- Never start an HTTP server
 - Only kill processes this session started
 - Check the terminals this session owns before finishing
