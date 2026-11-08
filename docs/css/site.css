@@ -200,18 +200,9 @@ body {
   gap: 0.65rem;
 }
 
-.header-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: inherit;
-  text-decoration: none;
+.header-end .btn-ghost {
+  padding: 0.32rem 0.7rem;
   font-size: 0.88rem;
-  font-weight: 500;
-}
-
-.header-link:hover {
-  color: var(--accent);
 }
 
 .icon {
@@ -234,7 +225,7 @@ body {
 .theme-switch {
   display: flex;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 0.4rem;
   padding: 0.12rem;
   background: color-mix(in srgb, var(--bg-2) 70%, transparent);
 }
@@ -246,7 +237,7 @@ body {
   color: var(--muted);
   width: 1.85rem;
   height: 1.85rem;
-  border-radius: 999px;
+  border-radius: 0.4rem;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -258,10 +249,10 @@ body {
 }
 
 .theme-switch button:focus-visible,
-.header-link:focus-visible,
 .uc:focus-visible,
 .brand:focus-visible,
 .btn:focus-visible,
+.btn-ghost:focus-visible,
 .shot:focus-visible,
 .close:focus-visible {
   outline: 2px solid var(--accent);
@@ -350,12 +341,21 @@ li + li {
   filter: brightness(1.06);
 }
 
-.text-link {
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.78rem 1.15rem;
+  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
   color: inherit;
+  text-decoration: none;
   font-weight: 500;
+  letter-spacing: -0.02em;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
 }
 
-.text-link:hover {
+.btn-ghost:hover {
   color: var(--accent);
 }
 
@@ -469,7 +469,7 @@ code {
     transform: none;
   }
 
-  .header-link span {
+  .header-end .btn-ghost span:not(.icon) {
     display: none;
   }
 }
