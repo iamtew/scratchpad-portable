@@ -34,6 +34,8 @@ An accent still opens further, wherever the ride is.
 The cutoff itself only drifts a little, plus the slow wobble under the envelope.
 The knob keeps cycling. The climax does not pin it open.
 
+On the bar it enters, the cutoff opens from closed. That swoop is one bar.
+
 ==================================================
 PATTERN
 ==================================================
@@ -99,7 +101,7 @@ The fifths accent, on steps 5, 13, and 15. Those sit off the kick.
 The octave is step 12. That step is the kick, so it does not chirp.
 
 The ride is the same 32 bars, half a cycle later.
-When the lead acid is playing, this cutoff sits a little further back.
+When the lead acid is playing, this cutoff sits further back.
 When the lead is open, this one is dull.
 The chirp is shorter than the lead. The note still keeps a body.
 The resting cutoff stays above the highpass. On the highpass, the tick disappears.

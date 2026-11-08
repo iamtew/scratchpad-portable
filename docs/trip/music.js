@@ -80,6 +80,8 @@
     hp: 180,
     send: 0.14,
     haas: 0.014,
+    // Phrase it first enters. Cutoff opens from closed across that one bar.
+    swoopPhrase: 1,
   };
   // Resting cutoff stays above the highpass. A floor on the highpass leaves the tick silent.
   const DRIVE_MOD = {
@@ -105,7 +107,7 @@
     // First bars of the track. Cutoff opens from nearly closed to the numbers above.
     wake: 4,
     // While the lead acid is playing, sit this far back from the open cutoff.
-    tuck: 0.78,
+    tuck: 0.62,
   };
 
   // Accents stay off the kick. A slide needs a next note to land on.
@@ -378,10 +380,17 @@
         base = floor + (base - floor) * open;
         env *= open;
       }
-      // Lead acid is in. Darken the driver a little so it stays behind that line.
+      // Lead acid is in. Darken the driver so it stays behind that line.
       if (mod.tuck && c.energy >= 35 && !c.drop) {
         base *= mod.tuck;
         env *= mod.tuck;
+      }
+      // First bar of the lead entrance. Closed on the downbeat, open by the next bar.
+      if (mod.swoopPhrase != null && c.phrase === mod.swoopPhrase && c.barInPhrase === 0) {
+        const open = c.sixteenth / 16;
+        const floor = 40;
+        base = floor + (base - floor) * open;
+        env *= open;
       }
       const peakF = Math.max(base + 1, Math.min(4600, base + env * (accent ? mod.accent : 1)));
       const decay = accent ? mod.decayAccent : mod.decay;
