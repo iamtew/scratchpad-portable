@@ -72,8 +72,8 @@ function cloudTexture(PIXI, size = 256) {
   const r = size / 2;
   for (const [ox, oy] of [[-0.14, -0.1], [0.16, 0.12]]) {
     const grd = ctx.createRadialGradient(r + ox * r, r + oy * r, 0, r, r, r * 0.92);
-    grd.addColorStop(0, "rgba(255,255,255,0.55)");
-    grd.addColorStop(0.35, "rgba(255,255,255,0.18)");
+    grd.addColorStop(0, "rgba(255,255,255,0.9)");
+    grd.addColorStop(0.35, "rgba(255,255,255,0.35)");
     grd.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, size, size);
@@ -116,7 +116,8 @@ void main() {
   vec2 warp = vec2(n - 0.5, n2 - 0.5) * uAmt;
   vec2 sampleUv = clamp(uv + warp, 0.0, 1.0);
   vec4 c = texture(uTexture, sampleUv);
-  c *= 0.45 + 0.9 * n;
+  c.rgb *= 0.75 + 0.5 * n;
+  c.a *= 0.65 + 0.4 * n;
   finalColor = c;
 }
 `;
@@ -136,6 +137,7 @@ function vapourFilter(PIXI, uAmt) {
     },
     padding: 40,
   });
+  filter.blendMode = "add";
   return filter;
 }
 
@@ -146,10 +148,10 @@ function vapour(PIXI, tex, spec = {}) {
   const rushSpd = spec.rush ?? 0.35;
   const flat = spec.flat ?? 1;
   const tight = spec.tight ?? 0.15;
-  const baseLo = spec.base ? spec.base[0] : 2.2;
-  const baseHi = spec.base ? spec.base[1] : 4.8;
+  const baseLo = spec.base ? spec.base[0] : 3.4;
+  const baseHi = spec.base ? spec.base[1] : 7;
   const band = spec.band;
-  const uAmt = spec.uAmt ?? 0.07;
+  const uAmt = spec.uAmt ?? 0.14;
   const root = new PIXI.Container();
   root.blendMode = "add";
   const warp = vapourFilter(PIXI, uAmt);
@@ -164,7 +166,7 @@ function vapour(PIXI, tex, spec = {}) {
     s.v = band ? band.y + (Math.random() - 0.5) * band.spread : Math.random();
     s.ph = rand(0, 6.28);
     s.base = rand(baseLo, baseHi);
-    s.alpha0 = rand(0.04, 0.1);
+    s.alpha0 = rand(0.12, 0.22);
     s.pair = i % 2;
     s.rot0 = rand(0, Math.PI);
     root.addChild(s);
@@ -177,7 +179,7 @@ function vapour(PIXI, tex, spec = {}) {
       const cx = w / 2;
       const cy = h / 2;
       for (const s of ps) {
-        s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 70, 58);
+        s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 78, 48);
         if (s.smoke) {
           s.x = s.u * w + Math.sin(t * 0.08 + s.ph) * w * 0.08;
           s.y = s.v * h + Math.cos(t * 0.06 + s.ph) * h * 0.05 * flat;
@@ -610,12 +612,12 @@ async function startPixi() {
     orbit(PIXI, tex),
     ribbons(PIXI, tex),
   ];
-  addVapour(scenes[0], PIXI, cloud, { n: 18, smoke: 0.25, tight: 0.08, rush: 0.5, base: [1.6, 3.2] });
-  addVapour(scenes[1], PIXI, cloud, { n: 16, smoke: 0.7, uAmt: 0.05, base: [1.8, 3.2] });
-  addVapour(scenes[2], PIXI, cloud, { n: 22, smoke: 0.45, rush: 0.22, base: [2.8, 5.2] });
-  addVapour(scenes[3], PIXI, cloud, { n: 24, smoke: 0.75, band: { y: 0.46, spread: 0.28 } });
-  addVapour(scenes[4], PIXI, cloud, { n: 18, flat: 0.55 });
-  addVapour(scenes[5], PIXI, cloud, { n: 20, smoke: 0.8, flat: 0.45, base: [2.4, 5.5] });
+  addVapour(scenes[0], PIXI, cloud, { n: 16, smoke: 0.65, tight: 0.18, rush: 0.4, base: [3.4, 7] });
+  addVapour(scenes[1], PIXI, cloud, { n: 14, smoke: 0.7, base: [3.2, 6.5] });
+  addVapour(scenes[2], PIXI, cloud, { n: 16, smoke: 0.6, rush: 0.22, base: [3.8, 7.5] });
+  addVapour(scenes[3], PIXI, cloud, { n: 18, smoke: 0.75, band: { y: 0.46, spread: 0.4 }, base: [3.4, 7] });
+  addVapour(scenes[4], PIXI, cloud, { n: 16, smoke: 0.6, flat: 0.55, base: [3.4, 7] });
+  addVapour(scenes[5], PIXI, cloud, { n: 16, smoke: 0.8, flat: 0.5, base: [3.8, 8] });
   for (const s of scenes) {
     s.fade = 0;
     s.root.alpha = 0;
