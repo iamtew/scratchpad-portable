@@ -581,6 +581,79 @@ function ribbons(PIXI, tex) {
   };
 }
 
+async function loadCode() {
+  const urls = ["trip.js", "music.js", "../js/site.js"];
+  const parts = await Promise.all(
+    urls.map((u) => fetch(u).then((r) => (r.ok ? r.text() : "")).catch(() => ""))
+  );
+  return parts.filter(Boolean).join("\n\n");
+}
+
+function codeTexture(PIXI, src) {
+  const fs = 11;
+  const lh = 13;
+  const cols = 64;
+  const rows = 96;
+  const pad = 6;
+  const lines = [];
+  for (const raw of src.split("\n")) {
+    const line = raw.replace(/\t/g, "  ");
+    if (line.length <= cols) lines.push(line);
+    else {
+      for (let i = 0; i < line.length; i += cols) lines.push(line.slice(i, i + cols));
+    }
+  }
+  if (!lines.length) return null;
+  const c = document.createElement("canvas");
+  c.width = pad * 2 + cols * 7;
+  c.height = pad * 2 + rows * lh;
+  const g = c.getContext("2d");
+  g.font = `${fs}px ui-monospace, Consolas, "Cascadia Mono", monospace`;
+  g.fillStyle = "#fff";
+  g.textBaseline = "top";
+  for (let i = 0; i < rows; i++) g.fillText(lines[i % lines.length], pad, pad + i * lh);
+  return PIXI.Texture.from(c);
+}
+
+// Faint pages of the site's own JS. Behind vapour. Not meant to be read.
+function codeRain(PIXI, tex) {
+  const root = new PIXI.Container();
+  const specs = [
+    { x: 0.04, scale: 0.92, speed: 22, ph: 0 },
+    { x: 0.36, scale: 1.04, speed: 34, ph: 2.1 },
+    { x: 0.7, scale: 0.84, speed: 16, ph: 4.2 },
+  ];
+  const cols = specs.map((spec) => {
+    const pair = new PIXI.Container();
+    const a = new PIXI.Sprite(tex);
+    const b = new PIXI.Sprite(tex);
+    a.scale.set(spec.scale);
+    b.scale.set(spec.scale);
+    pair.addChild(a, b);
+    root.addChild(pair);
+    return { pair, a, b, spec, y: Math.random() * tex.height * spec.scale };
+  });
+  return {
+    root,
+    update(t, w, h, dt, grade) {
+      for (const col of cols) {
+        const sh = tex.height * col.spec.scale;
+        col.y += (col.spec.speed + grade.drive * 18 + grade.kick * 10) * dt;
+        if (col.y >= sh) col.y -= sh;
+        col.pair.x = w * col.spec.x;
+        col.a.y = col.y;
+        col.b.y = col.y - sh;
+        const mix = 0.5 + 0.5 * Math.sin(t * 0.32 + col.spec.ph);
+        const hue = (grade.hue + mix * 140 + t * 12 + col.spec.ph * 18) % 360;
+        const tint = hsl(hue, 72, 62);
+        col.a.tint = tint;
+        col.b.tint = tint;
+        col.pair.alpha = (0.11 + 0.09 * Math.sin(t * 0.48 + col.spec.ph)) * grade.bright;
+      }
+    },
+  };
+}
+
 let pixiStarted = false;
 
 async function startPixi() {
@@ -598,6 +671,11 @@ async function startPixi() {
     autoDensity: true,
     resolution: Math.min(devicePixelRatio || 1, 2),
   });
+
+  const src = await loadCode();
+  const codeTex = src ? codeTexture(PIXI, src) : null;
+  const code = codeTex ? codeRain(PIXI, codeTex) : null;
+  if (code) app.stage.addChildAt(code.root, 0);
 
   const tex = glowTexture(PIXI);
   const cloud = cloudTexture(PIXI);
@@ -641,6 +719,7 @@ async function startPixi() {
     const ease = reduceMotion ? 1 : Math.min(1, dt * 4.5);
     const active = grade.section % scenes.length;
     const { width: w, height: h } = app.screen;
+    if (code) code.update(t, w, h, dt, grade);
     for (let i = 0; i < scenes.length; i++) {
       const s = scenes[i];
       const target = i === active ? 1 : 0;
