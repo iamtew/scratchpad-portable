@@ -102,6 +102,8 @@
     send: 0.05,
     haas: 0,
     fromStart: true,
+    // First bars of the track. Cutoff opens from nearly closed to the numbers above.
+    wake: 4,
   };
 
   // Accents stay off the kick. A slide needs a next note to land on.
@@ -365,9 +367,16 @@
       // Env mod climbs and falls over 32 bars. Cutoff only drifts a little.
       // mod.ride is half a cycle on the driver, so it is dull when the lead is open.
       const ride = 0.5 + 0.5 * Math.sin((c.bar / 32) * Math.PI * 2 + mod.ride);
-      const env = mod.env + ride * mod.span;
-      const base = mod.base + Math.sin(c.bar / 4) * mod.drift;
-      const peakF = Math.min(4600, base + env * (accent ? mod.accent : 1));
+      let env = mod.env + ride * mod.span;
+      let base = mod.base + Math.sin(c.bar / 4) * mod.drift;
+      // First bars: cutoff starts nearly closed and reaches the normal place by the end.
+      if (mod.wake && c.bar < mod.wake) {
+        const open = (c.bar * 16 + c.sixteenth) / (mod.wake * 16);
+        const floor = 260;
+        base = floor + (base - floor) * open;
+        env *= open;
+      }
+      const peakF = Math.max(base + 1, Math.min(4600, base + env * (accent ? mod.accent : 1)));
       const decay = accent ? mod.decayAccent : mod.decay;
       v.filter.frequency.cancelScheduledValues(t);
       v.filter.frequency.setValueAtTime(base, t);
