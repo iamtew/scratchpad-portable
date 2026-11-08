@@ -193,8 +193,10 @@ body::after {
   border-radius: 50%;
   filter: blur(42px);
   mix-blend-mode: screen;
-  opacity: 0.72;
-  animation: vap-drift 18s ease-in-out infinite alternate;
+  /* Far = small, nearer the word. Then it grows and drifts out, like trip rush. */
+  --dx: 0%;
+  --dy: 0%;
+  animation: vap-rush 16s cubic-bezier(0.37, 0, 0.85, 0.45) infinite;
 }
 
 .vap-a {
@@ -203,6 +205,8 @@ body::after {
   left: 6%;
   top: 16%;
   background: hsl(0 78% 48%);
+  --dx: 22%;
+  --dy: 16%;
 }
 
 .vap-b {
@@ -211,8 +215,10 @@ body::after {
   right: 4%;
   top: 10%;
   background: hsl(140 78% 42%);
-  animation-duration: 22s;
-  animation-delay: -4s;
+  --dx: -20%;
+  --dy: 14%;
+  animation-duration: 20s;
+  animation-delay: -7s;
 }
 
 .vap-c {
@@ -221,8 +227,10 @@ body::after {
   left: 16%;
   bottom: 6%;
   background: hsl(140 78% 45%);
-  animation-duration: 16s;
-  animation-delay: -8s;
+  --dx: 16%;
+  --dy: -18%;
+  animation-duration: 18s;
+  animation-delay: -12s;
 }
 
 .vap-d {
@@ -231,13 +239,22 @@ body::after {
   right: 14%;
   bottom: 14%;
   background: hsl(0 78% 46%);
-  animation-duration: 20s;
-  animation-delay: -2s;
+  --dx: -14%;
+  --dy: -14%;
+  animation-duration: 22s;
+  animation-delay: -3s;
 }
 
-@keyframes vap-drift {
-  from { transform: translate(0, 0) scale(1); }
-  to { transform: translate(5%, -7%) scale(1.1); }
+@keyframes vap-rush {
+  0% {
+    transform: translate(var(--dx), var(--dy)) scale(0.55);
+    opacity: 0.12;
+  }
+  14% { opacity: 0.7; }
+  100% {
+    transform: translate(calc(var(--dx) * -0.35), calc(var(--dy) * -0.35)) scale(1.28);
+    opacity: 0;
+  }
 }
 
 .begin {
