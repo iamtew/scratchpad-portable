@@ -100,13 +100,19 @@ async function startPixi() {
 }
 
 function setupDownload() {
-  fetch("https://api.github.com/repos/iamtew/scratchpad-portable/releases/latest")
-    .then((r) => r.json())
-    .then((rel) => {
-      const zip = (rel.assets || []).find((a) => /\.zip$/i.test(a.name));
-      if (!zip) return;
+  fetch("releases.json")
+    .then((r) => {
+      if (!r.ok) throw new Error("no list");
+      return r.json();
+    })
+    .then((data) => {
+      if (!data || !data.tag || !Array.isArray(data.files)) return;
+      const name = data.files.find((f) => /\.zip$/i.test(f));
+      if (!name) return;
+      const href = `https://github.com/iamtew/scratchpad-portable/releases/download/${data.tag}/${encodeURIComponent(name)}`;
       document.querySelectorAll("[data-download]").forEach((a) => {
-        a.href = zip.browser_download_url;
+        a.href = href;
+        a.hidden = false;
       });
     })
     .catch(() => {});
