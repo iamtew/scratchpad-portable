@@ -16,12 +16,6 @@
   ];
   const TOTAL_BARS = PHRASES.reduce((n, p) => n + p.bars, 0);
   const TOTAL_STEPS = TOTAL_BARS * 16;
-  const BASS_MASKS = [
-    [0, 1, 1, 1],
-    [0, 1, 1, 0],
-    [0, 1, 0, 1],
-    [0, 1, 1, 1],
-  ];
   const BASS_HZ = [41.2, 41.2, 49.0, 36.71];
   const LEAD_HZ = [329.63, 369.99, 415.3, 493.88, 554.37];
   // Semitones from the bass root, accent, slide into the next step.
@@ -218,8 +212,12 @@
 
   function bass(t, c) {
     if (c.beat16 === 0) return;
-    const mask = BASS_MASKS[Math.floor(c.bar / 8) % BASS_MASKS.length];
-    if (!mask[c.beat16]) return;
+    // Three notes between kicks. A hole only on the way into the next phrase.
+    const lastBar = c.barInPhrase === 15;
+    const intoDrop = c.tension && c.barInPhrase >= 14;
+    const outOfBreak = c.drop && lastBar;
+    if ((lastBar || intoDrop) && c.beat16 === 3) return;
+    if ((intoDrop || outOfBreak) && lastBar && c.beat16 === 2) return;
 
     const cycle = Math.floor(c.bar / 8);
     const hz = BASS_HZ[cycle % BASS_HZ.length];

@@ -68,12 +68,16 @@ Without mutation psytrance becomes Excel.
 Every 8 or 16 bars:
 - change filter cutoff
 - change distortion amount
-- change note pattern
 
-Small changes.
+The roll stays. Three notes between kicks.
 
-Listeners love evolution.
-Listeners hate noticing the evolution.
+The pattern breaks only at the edge of a phrase.
+The last bar drops the 16th before the kick.
+On the way into a drop, and out of the breakdown, that last bar is a single offbeat.
+Then the roll is back.
+
+Listeners love a hole they can feel coming.
+Listeners hate a hole that forgot to close.
 
 AGENT 4: PERCUSSION SWARM
 
