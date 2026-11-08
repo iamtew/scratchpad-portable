@@ -81,18 +81,90 @@ function cloudTexture(PIXI, size = 256) {
   return PIXI.Texture.from(c);
 }
 
-// Faint gas under every scene. Half drifts, half rushes past.
-function vapour(PIXI, tex) {
+// Tear round blobs into gas. Warp UVs with fbm, then cut alpha with the same noise.
+const VAPOUR_FRAG = `
+in vec2 vTextureCoord;
+out vec4 finalColor;
+uniform sampler2D uTexture;
+uniform float uTime;
+uniform float uAmt;
+uniform vec4 uInputClamp;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float fbm(vec2 p) {
+  float s = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 4; i++) {
+    s += a * noise(p);
+    p *= 2.03;
+    a *= 0.5;
+  }
+  return s;
+}
+
+void main() {
+  vec2 uv = vTextureCoord;
+  float n = fbm(uv * 4.0 + vec2(uTime * 0.07, uTime * 0.05));
+  float n2 = fbm(uv * 3.0 + vec2(8.0, uTime * 0.04));
+  vec2 warp = vec2(n - 0.5, n2 - 0.5) * uAmt;
+  vec2 sampleUv = clamp(uv + warp, uInputClamp.xy, uInputClamp.zw);
+  vec4 c = texture(uTexture, sampleUv);
+  c *= 0.45 + 0.9 * n;
+  finalColor = c;
+}
+`;
+
+function vapourFilter(PIXI, uAmt) {
+  const filter = new PIXI.Filter({
+    glProgram: PIXI.GlProgram.from({
+      vertex: PIXI.defaultFilterVert,
+      fragment: VAPOUR_FRAG,
+      name: "vapour-noise",
+    }),
+    resources: {
+      warpUniforms: {
+        uTime: { value: 0, type: "f32" },
+        uAmt: { value: uAmt, type: "f32" },
+      },
+    },
+    padding: 40,
+  });
+  return filter;
+}
+
+// Faint gas. spec: n, smoke, rush, flat, tight, base, uAmt, band.
+function vapour(PIXI, tex, spec = {}) {
+  const n = spec.n ?? 28;
+  const smokeN = Math.round(n * (spec.smoke ?? 0.5));
+  const rushSpd = spec.rush ?? 0.35;
+  const flat = spec.flat ?? 1;
+  const tight = spec.tight ?? 0.15;
+  const baseLo = spec.base ? spec.base[0] : 2.2;
+  const baseHi = spec.base ? spec.base[1] : 4.8;
+  const band = spec.band;
+  const uAmt = spec.uAmt ?? 0.07;
   const root = new PIXI.Container();
+  root.blendMode = "add";
+  const warp = vapourFilter(PIXI, uAmt);
+  root.filters = [warp];
+  const uniforms = warp.resources.warpUniforms.uniforms;
   const ps = [];
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < n; i++) {
     const s = glowSprite(PIXI, tex);
-    s.smoke = i < 14;
+    s.smoke = i < smokeN;
     s.z = Math.random();
     s.u = Math.random();
-    s.v = Math.random();
+    s.v = band ? band.y + (Math.random() - 0.5) * band.spread : Math.random();
     s.ph = rand(0, 6.28);
-    s.base = rand(2.2, 4.8);
+    s.base = rand(baseLo, baseHi);
     s.alpha0 = rand(0.04, 0.1);
     s.pair = i % 2;
     s.rot0 = rand(0, Math.PI);
@@ -102,22 +174,23 @@ function vapour(PIXI, tex) {
   return {
     root,
     update(t, w, h, dt, grade) {
+      uniforms.uTime = t;
       const cx = w / 2;
       const cy = h / 2;
       for (const s of ps) {
         s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 70, 58);
         if (s.smoke) {
           s.x = s.u * w + Math.sin(t * 0.08 + s.ph) * w * 0.08;
-          s.y = s.v * h + Math.cos(t * 0.06 + s.ph) * h * 0.06;
-          s.scale.set(s.base * (1.1 + Math.sin(t * 0.15 + s.ph) * 0.2));
+          s.y = s.v * h + Math.cos(t * 0.06 + s.ph) * h * 0.05 * flat;
+          s.scale.set(s.base * (1.1 + Math.sin(t * 0.15 + s.ph) * 0.2), s.base * (1.1 + Math.sin(t * 0.15 + s.ph) * 0.2) * flat);
           s.alpha = s.alpha0 * grade.bright * (0.45 + 0.25 * Math.sin(t * 0.2 + s.ph));
           s.rotation = s.rot0 + t * 0.03;
         } else {
-          s.z = rush(s.z, dt * 0.35, grade);
+          s.z = rush(s.z, dt * rushSpd, grade);
           const lift = fly(s.z);
-          s.x = cx + (s.u - 0.5) * w * (0.15 + lift * 1.1);
-          s.y = cy + (s.v - 0.5) * h * (0.15 + lift * 1.1);
-          s.scale.set(s.base * (0.4 + lift * 1.4));
+          s.x = cx + (s.u - 0.5) * w * (tight + lift * 1.1);
+          s.y = cy + (s.v - 0.5) * h * (tight + lift * 1.1) * flat;
+          s.scale.set(s.base * (0.4 + lift * 1.4), s.base * (0.4 + lift * 1.4) * flat);
           s.alpha = s.alpha0 * grade.bright * (0.15 + 0.7 * Math.sin(s.z * Math.PI));
         }
       }
@@ -509,6 +582,7 @@ async function startPixi() {
     canvas,
     resizeTo: window,
     background: 0x050506,
+    preference: "webgl",
     antialias: true,
     autoDensity: true,
     resolution: Math.min(devicePixelRatio || 1, 2),
