@@ -109,14 +109,13 @@ Do not cut so hard that the hats disappear.
 ATMOSPHERE
 ==================================================
 
-A minor triad, two octaves above the bass root.
-The top note walks fifth, flat seven, fifth, third, root, third, and back.
-The lowpass drifts, so the chord breathes.
+A minor triad, two octaves above the bass root. Triangles, so it does not ring.
+The top note still walks. A slow wobble sits on the filter the whole time.
 
-The dry chord is what you hear.
-A send of that chord goes to a bright reverb.
-Highpass the return around 280 Hz.
-The noise bed is only a hiss behind it. The kick and the bass do not go there.
+They start almost inaudible, filter nearly closed.
+Over 32 bars the level and the cutoff rise together, then fall back.
+The reverb follows that breath. It does not hold the chord up on its own.
+The return stays highpassed. The noise bed stays a hiss behind the chord.
 
 ==================================================
 DELAY

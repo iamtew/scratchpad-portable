@@ -431,16 +431,17 @@
       atmoFilter.frequency.setTargetAtTime(500 + c.energy * 8 + Math.sin(t * 0.07) * 120, t, 0.4);
     }
     if (padLo) {
-      // Minor triad two octaves above the bass, so the chord is a chord.
-      // The top note walks. The dry level is the pad. The reverb is behind it.
+      // One breath over 32 bars, from nearly nothing to a chord and back.
+      // The faster wobble is the movement inside that breath.
       const fund = BASS_HZ[Math.floor(c.bar / 8) % BASS_HZ.length] * 8;
       const top = PAD_TOP[Math.floor(c.bar / 4) % PAD_TOP.length];
-      padLo.frequency.setTargetAtTime(fund, t, 0.8);
-      padMid.frequency.setTargetAtTime(fund * Math.pow(2, 3 / 12), t, 0.8);
-      padHi.frequency.setTargetAtTime(fund * Math.pow(2, top / 12), t, 1.1);
-      const cut = 1400 + Math.sin(c.bar / 5) * 450 + (c.drop ? -400 : c.energy * 4);
-      padFilter.frequency.setTargetAtTime(Math.max(600, cut), t, 0.6);
-      padGain.gain.setTargetAtTime(0.055, t, 0.5);
+      const breath = 0.5 - 0.5 * Math.cos((c.bar / 32) * Math.PI * 2);
+      const wobble = Math.sin(c.bar / 2.5) * 90;
+      padLo.frequency.setTargetAtTime(fund, t, 1.2);
+      padMid.frequency.setTargetAtTime(fund * Math.pow(2, 3 / 12), t, 1.2);
+      padHi.frequency.setTargetAtTime(fund * Math.pow(2, top / 12), t, 1.6);
+      padFilter.frequency.setTargetAtTime(340 + breath * 700 + wobble, t, 0.5);
+      padGain.gain.setTargetAtTime(0.004 + breath * 0.036, t, 0.6);
     }
   }
 
@@ -656,27 +657,33 @@
     bedSend.gain.value = 0.08;
     atmoFilter.connect(bedSend).connect(verbIn);
 
-    // Dry chord into the mix. A send behind it, not instead of it.
+    // Triangles, not saws. An open saw is what was ringing.
+    // Dry chord starts almost silent. The breath in fxMotion brings it up.
     const fund = BASS_HZ[0] * 8;
     padLo = ctx.createOscillator();
-    padLo.type = "sawtooth";
+    padLo.type = "triangle";
     padLo.frequency.value = fund;
     padMid = ctx.createOscillator();
-    padMid.type = "sawtooth";
+    padMid.type = "triangle";
     padMid.frequency.value = fund * Math.pow(2, 3 / 12);
-    padMid.detune.value = -6;
+    padMid.detune.value = -4;
     padHi = ctx.createOscillator();
-    padHi.type = "sawtooth";
+    padHi.type = "triangle";
     padHi.frequency.value = fund * Math.pow(2, 7 / 12);
-    padHi.detune.value = 6;
+    padHi.detune.value = 4;
     padFilter = ctx.createBiquadFilter();
     padFilter.type = "lowpass";
-    padFilter.frequency.value = 1400;
-    padFilter.Q.value = 0.5;
+    padFilter.frequency.value = 340;
+    padFilter.Q.value = 0.4;
     padGain = ctx.createGain();
-    padGain.gain.value = 0.055;
+    padGain.gain.value = 0.004;
+    const padDrift = ctx.createOscillator();
+    padDrift.frequency.value = 0.1;
+    const padDriftGain = ctx.createGain();
+    padDriftGain.gain.value = 140;
+    padDrift.connect(padDriftGain).connect(padFilter.frequency);
     const padSend = ctx.createGain();
-    padSend.gain.value = 0.65;
+    padSend.gain.value = 0.45;
     padLo.connect(padFilter);
     padMid.connect(padFilter);
     padHi.connect(padFilter);
@@ -686,6 +693,7 @@
     padLo.start();
     padMid.start();
     padHi.start();
+    padDrift.start();
   }
 
   async function start() {
