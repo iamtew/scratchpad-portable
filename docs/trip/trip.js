@@ -198,6 +198,16 @@ function vapour(PIXI, tex, spec = {}) {
   };
 }
 
+function addVapour(scene, PIXI, cloud, spec) {
+  const mist = vapour(PIXI, cloud, spec);
+  scene.root.addChildAt(mist.root, 0);
+  const draw = scene.update;
+  scene.update = (t, w, h, dt, grade) => {
+    mist.update(t, w, h, dt, grade);
+    draw(t, w, h, dt, grade);
+  };
+}
+
 // Forward travel. z 0 is far (small, at the center), z 1 has passed the camera.
 // About 3 seconds to cross at mid energy. Reduced motion passes dt 0, so it holds.
 function rush(z, dt, grade) {
@@ -589,8 +599,7 @@ async function startPixi() {
   });
 
   const tex = glowTexture(PIXI);
-  const mist = vapour(PIXI, cloudTexture(PIXI));
-  app.stage.addChild(mist.root);
+  const cloud = cloudTexture(PIXI);
   const w0 = app.screen.width || innerWidth;
   const h0 = app.screen.height || innerHeight;
   // Order is the 8-bar cycle. Hue changes with the block, so a repeat is a new grade.
@@ -602,6 +611,12 @@ async function startPixi() {
     orbit(PIXI, tex),
     ribbons(PIXI, tex),
   ];
+  addVapour(scenes[0], PIXI, cloud, { n: 18, smoke: 0.25, tight: 0.08, rush: 0.5, base: [1.6, 3.2] });
+  addVapour(scenes[1], PIXI, cloud, { n: 16, smoke: 0.7, uAmt: 0.05, base: [1.8, 3.2] });
+  addVapour(scenes[2], PIXI, cloud, { n: 22, smoke: 0.45, rush: 0.22, base: [2.8, 5.2] });
+  addVapour(scenes[3], PIXI, cloud, { n: 24, smoke: 0.75, band: { y: 0.46, spread: 0.28 } });
+  addVapour(scenes[4], PIXI, cloud, { n: 18, flat: 0.55 });
+  addVapour(scenes[5], PIXI, cloud, { n: 20, smoke: 0.8, flat: 0.45, base: [2.4, 5.5] });
   for (const s of scenes) {
     s.fade = 0;
     s.root.alpha = 0;
@@ -625,7 +640,6 @@ async function startPixi() {
     const ease = reduceMotion ? 1 : Math.min(1, dt * 4.5);
     const active = grade.section % scenes.length;
     const { width: w, height: h } = app.screen;
-    mist.update(t, w, h, dt, grade);
     for (let i = 0; i < scenes.length; i++) {
       const s = scenes[i];
       const target = i === active ? 1 : 0;
