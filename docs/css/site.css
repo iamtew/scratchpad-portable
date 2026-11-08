@@ -370,6 +370,7 @@ li + li {
   overflow: hidden;
   box-shadow: var(--shadow);
   transform: rotate(1.2deg);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .shot img {
@@ -381,6 +382,21 @@ li + li {
 
 .shot:hover {
   transform: rotate(0deg) translateY(-4px);
+}
+
+.shot:hover img {
+  animation: shot-idle 3s ease-in-out infinite;
+}
+
+@keyframes shot-idle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(-0.6deg);
+  }
 }
 
 dialog {
@@ -465,8 +481,13 @@ code {
     gap: 2rem;
   }
 
-  .shot {
+  .shot,
+  .shot:hover {
     transform: none;
+  }
+
+  .shot:hover img {
+    animation: none;
   }
 
   .header-end .btn-ghost span:not(.icon) {
@@ -478,5 +499,9 @@ code {
   .shot,
   .shot:hover {
     transform: none;
+  }
+
+  .shot:hover img {
+    animation: none;
   }
 }
