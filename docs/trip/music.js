@@ -26,6 +26,7 @@
   const LEAD_HZ = [329.63, 369.99, 415.3, 493.88, 554.37];
 
   let ctx;
+  let sum;
   let master;
   let bassFilter;
   let bassShaper;
@@ -74,7 +75,7 @@
   }
 
   function shaperCurve(drive) {
-    const n = 256;
+    const n = 1024;
     const curve = new Float32Array(n);
     const k = 1 + drive * 5;
     for (let i = 0; i < n; i++) {
@@ -136,15 +137,26 @@
   }
 
   function kick(t) {
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(180, t);
-    osc.frequency.exponentialRampToValueAtTime(55, t + 0.04);
-    const g = envGain(t, 1, 0.001, 0.15);
-    osc.connect(g).connect(master);
-    osc.start(t);
-    osc.stop(t + 0.18);
-    noiseBurst(t, master, 0.2, 0.001, 0.016, "highpass", 2000, 0.7);
+    const knock = ctx.createOscillator();
+    knock.type = "sine";
+    knock.frequency.setValueAtTime(180, t);
+    knock.frequency.exponentialRampToValueAtTime(70, t + 0.04);
+    const kg = envGain(t, 0.45, 0.001, 0.15);
+    knock.connect(kg).connect(sum);
+    knock.start(t);
+    knock.stop(t + 0.18);
+
+    // Sub tail. The knock is gone by 150 ms; this is the weight under it.
+    const sub = ctx.createOscillator();
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(90, t);
+    sub.frequency.exponentialRampToValueAtTime(46, t + 0.08);
+    const sg = envGain(t, 0.5, 0.001, 0.3);
+    sub.connect(sg).connect(sum);
+    sub.start(t);
+    sub.stop(t + 0.34);
+
+    noiseBurst(t, sum, 0.1, 0.001, 0.012, "bandpass", 2000, 1);
     lastKickTime = t;
   }
 
@@ -156,7 +168,7 @@
     const cycle = Math.floor(c.bar / 8);
     const hz = BASS_HZ[cycle % BASS_HZ.length];
     if (c.beat16 === 1 && c.sixteenth === 1) {
-      bassShaper.curve = shaperCurve(0.25 + (c.energy / 100) * 0.35);
+      bassShaper.curve = shaperCurve(0.5 + (c.energy / 100) * 0.35);
     }
 
     const open = c.tension ? 180 : 0;
@@ -164,12 +176,21 @@
     bassFilter.frequency.setTargetAtTime(Math.min(cut, 480), t, 0.03);
     bassFilter.Q.setTargetAtTime(c.tension ? 2.2 : 1.2, t, 0.05);
 
+    // Sine is the fundamental the filtered saws lack, so the shaper warms a body.
+    const body = ctx.createOscillator();
+    body.type = "sine";
+    body.frequency.value = hz;
+    const bg = envGain(t, 0.25, 0.001, 0.1);
+    body.connect(bg).connect(bassFilter);
+    body.start(t);
+    body.stop(t + 0.12);
+
     for (const detune of [-6, 6]) {
       const osc = ctx.createOscillator();
       osc.type = "sawtooth";
       osc.frequency.value = hz;
       osc.detune.value = detune;
-      const g = envGain(t, 0.16, 0.001, 0.065);
+      const g = envGain(t, 0.12, 0.001, 0.065);
       osc.connect(g).connect(bassFilter);
       osc.start(t);
       osc.stop(t + 0.085);
@@ -184,17 +205,17 @@
     if (!closed && !extra) return;
     if (closed && c.energy < 20 && sixteenth % 4 !== 1) return;
     const open = c.energy > 60 && sixteenth === 14;
-    const decay = open ? 0.16 : 0.018;
+    const decay = open ? 0.16 : 0.03;
     const peak = open ? 0.045 : 0.028;
-    noiseBurst(t, master, peak, 0.001, decay, "highpass", open ? 7000 : 8500, 0.6);
+    noiseBurst(t, sum, peak, 0.001, decay, "highpass", open ? 7000 : 6000, 0.6);
     if (c.energy > 40 && Math.random() < 0.7) {
-      noiseBurst(t, master, 0.012 + Math.random() * 0.018, 0.001, 0.04, "bandpass", 5500, 1.2);
+      noiseBurst(t, sum, 0.012 + Math.random() * 0.018, 0.001, 0.04, "bandpass", 5500, 1.2);
     }
   }
 
   function ride(t, c) {
     if (c.energy < 70 || c.sixteenth % 4 !== 2) return;
-    noiseBurst(t, master, 0.02, 0.002, 0.22, "highpass", 9000, 0.4);
+    noiseBurst(t, sum, 0.02, 0.002, 0.22, "highpass", 6500, 0.4);
     const car = ctx.createOscillator();
     const mod = ctx.createOscillator();
     const modG = ctx.createGain();
@@ -203,7 +224,7 @@
     car.frequency.value = 320;
     const g = envGain(t, 0.012, 0.002, 0.2);
     mod.connect(modG).connect(car.frequency);
-    car.connect(g).connect(master);
+    car.connect(g).connect(sum);
     mod.start(t);
     car.start(t);
     mod.stop(t + 0.24);
@@ -224,13 +245,13 @@
     osc.frequency.value = note;
     const lp = ctx.createBiquadFilter();
     lp.type = "lowpass";
-    lp.Q.value = 8 + Math.sin(t * 2.1) * 4;
-    lp.frequency.setValueAtTime(900 + c.energy * 18, t);
+    lp.Q.value = 3 + Math.sin(t * 2.1) * 1.2;
+    lp.frequency.setValueAtTime(700 + c.energy * 12, t);
     lp.frequency.exponentialRampToValueAtTime(400 + c.energy * 8, t + 0.12);
     const peak = 0.035 + (c.energy / 100) * 0.04;
     const g = envGain(t, peak, 0.002, 0.09);
     osc.connect(lp).connect(g);
-    g.connect(master);
+    g.connect(sum);
     g.connect(delaySend);
     osc.start(t);
     osc.stop(t + 0.14);
@@ -306,6 +327,7 @@
     timer = 0;
     const dying = ctx;
     ctx = null;
+    sum = null;
     master = null;
     step = 0;
     lastKickTime = -99;
@@ -333,16 +355,26 @@
   }
 
   function wireBus() {
+    // Soft clip the sum, then take the fizz off. Volume stays on master.
+    sum = ctx.createGain();
+    const glue = ctx.createWaveShaper();
+    glue.curve = shaperCurve(0.4);
+    glue.oversample = "2x";
+    const air = ctx.createBiquadFilter();
+    air.type = "highshelf";
+    air.frequency.value = 7500;
+    air.gain.value = -3;
     master = ctx.createGain();
     master.gain.value = volume;
-    master.connect(ctx.destination);
+    sum.connect(glue).connect(air).connect(master).connect(ctx.destination);
 
     bassFilter = ctx.createBiquadFilter();
     bassFilter.type = "lowpass";
     bassFilter.frequency.value = 240;
     bassFilter.Q.value = 1.2;
     bassShaper = ctx.createWaveShaper();
-    bassShaper.curve = shaperCurve(0.3);
+    bassShaper.curve = shaperCurve(0.5);
+    bassShaper.oversample = "2x";
     bassEq = ctx.createBiquadFilter();
     bassEq.type = "peaking";
     bassEq.frequency.value = 100;
@@ -351,8 +383,8 @@
     const mud = ctx.createBiquadFilter();
     mud.type = "peaking";
     mud.frequency.value = 320;
-    mud.gain.value = -3;
-    bassFilter.connect(bassShaper).connect(bassEq).connect(mud).connect(master);
+    mud.gain.value = -1.5;
+    bassFilter.connect(bassShaper).connect(bassEq).connect(mud).connect(sum);
 
     delaySend = ctx.createGain();
     delaySend.gain.value = 0.55;
@@ -373,7 +405,7 @@
     delayR.connect(delayFbR).connect(delayR);
     delayL.connect(delayHp);
     delayR.connect(delayHp);
-    delayHp.connect(master);
+    delayHp.connect(sum);
 
     atmoFilter = ctx.createBiquadFilter();
     atmoFilter.type = "lowpass";
@@ -383,7 +415,7 @@
     const atmo = ctx.createBufferSource();
     atmo.buffer = atmoBuf;
     atmo.loop = true;
-    atmo.connect(atmoFilter).connect(atmoGain).connect(master);
+    atmo.connect(atmoFilter).connect(atmoGain).connect(sum);
     atmo.start();
   }
 
