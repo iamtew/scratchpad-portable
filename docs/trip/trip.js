@@ -616,17 +616,21 @@ function codeTexture(PIXI, src) {
 }
 
 // Faint pages of the site's own JS. Behind vapour. Not meant to be read.
+// Left and right of center, leaned in so the walls follow the rush.
 function codeRain(PIXI, tex) {
   const root = new PIXI.Container();
   const specs = [
-    { x: 0.04, scale: 0.92, speed: 22, ph: 0 },
-    { x: 0.36, scale: 1.04, speed: 34, ph: 2.1 },
-    { x: 0.7, scale: 0.84, speed: 16, ph: 4.2 },
+    { side: -1, x: 0.2, scale: 1.02, speed: 28, ph: 0, tilt: 0.5 },
+    { side: -1, x: 0.08, scale: 0.8, speed: 17, ph: 1.7, tilt: 0.36 },
+    { side: 1, x: 0.8, scale: 1.02, speed: 30, ph: 2.4, tilt: 0.5 },
+    { side: 1, x: 0.92, scale: 0.8, speed: 16, ph: 4.1, tilt: 0.36 },
   ];
   const cols = specs.map((spec) => {
     const pair = new PIXI.Container();
     const a = new PIXI.Sprite(tex);
     const b = new PIXI.Sprite(tex);
+    a.anchor.set(0.5, 0);
+    b.anchor.set(0.5, 0);
     a.scale.set(spec.scale);
     b.scale.set(spec.scale);
     pair.addChild(a, b);
@@ -641,8 +645,10 @@ function codeRain(PIXI, tex) {
         col.y += (col.spec.speed + grade.drive * 18 + grade.kick * 10) * dt;
         if (col.y >= sh) col.y -= sh;
         col.pair.x = w * col.spec.x;
-        col.a.y = col.y;
-        col.b.y = col.y - sh;
+        col.pair.y = h * 0.5;
+        col.pair.rotation = -col.spec.side * col.spec.tilt;
+        col.a.y = col.y - sh / 2;
+        col.b.y = col.y - sh / 2 - sh;
         const mix = 0.5 + 0.5 * Math.sin(t * 0.32 + col.spec.ph);
         const hue = (grade.hue + mix * 140 + t * 12 + col.spec.ph * 18) % 360;
         const tint = hsl(hue, 72, 62);
