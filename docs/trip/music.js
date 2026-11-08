@@ -58,7 +58,7 @@
   let acidFilter;
   let acidAmp;
   let acidHeld = false;
-  let acidPeak = 0.08;
+  let acidPeak = 0.055;
   let delayL;
   let delayR;
   let delayFbL;
@@ -268,9 +268,11 @@
     // An accent is the squelch, so it opens the filter even when the pitch slid in.
     const retrig = !acidHeld || accent;
     if (retrig) {
-      // Closed while the phrase is quiet, open by the climax. The slow sine is the drift.
-      const base = 340 + c.energy * 4 + Math.sin(c.bar / 4) * 80;
-      const peakF = Math.min(4600, base + (accent ? 2400 : 1200));
+      // Env mod climbs and falls over 32 bars. Cutoff only drifts a little.
+      const ride = 0.5 + 0.5 * Math.sin((c.bar / 32) * Math.PI * 2);
+      const env = 450 + ride * 2200;
+      const base = 400 + Math.sin(c.bar / 4) * 70;
+      const peakF = Math.min(4600, base + env * (accent ? 1.55 : 1));
       const decay = accent ? 0.08 : 0.05;
       acidFilter.frequency.cancelScheduledValues(t);
       acidFilter.frequency.setValueAtTime(base, t);
@@ -278,7 +280,7 @@
       acidFilter.frequency.exponentialRampToValueAtTime(base, t + 0.012 + decay);
       acidFilter.Q.setTargetAtTime(c.tension ? 20 : 16, t, 0.05);
 
-      acidPeak = accent ? 0.13 : 0.08;
+      acidPeak = accent ? 0.09 : 0.055;
       acidAmp.gain.cancelScheduledValues(t);
       acidAmp.gain.setValueAtTime(0.0001, t);
       acidAmp.gain.exponentialRampToValueAtTime(acidPeak, t + 0.004);
@@ -468,6 +470,10 @@
     // The curve clamps past ±1. Trim first, glue, then makeup. That clamp is the clip.
     sum = ctx.createGain();
     sum.gain.value = 0.55;
+    // Stereo, so the acid offset is not folded back to the center.
+    // Mono sources still copy to both sides.
+    sum.channelCount = 2;
+    sum.channelCountMode = "explicit";
     const glue = ctx.createWaveShaper();
     glue.curve = shaperCurve(0.4);
     glue.oversample = "2x";
@@ -567,9 +573,17 @@
     acidAmp = ctx.createGain();
     acidAmp.gain.value = 0.0001;
     const acidSend = ctx.createGain();
-    acidSend.gain.value = 0.2;
+    acidSend.gain.value = 0.14;
+    // One side a few milliseconds late. The voice is still one saw.
+    // The delay send taps the mono amp, so the echoes are not a second copy of that offset.
+    const acidMerge = ctx.createChannelMerger(2);
+    const acidHaas = ctx.createDelay(0.05);
+    acidHaas.delayTime.value = 0.014;
     acidOsc.connect(acidFilter).connect(acidShaper).connect(acidHp).connect(acidAmp);
-    acidAmp.connect(sum);
+    acidAmp.connect(acidMerge, 0, 0);
+    acidAmp.connect(acidHaas);
+    acidHaas.connect(acidMerge, 0, 1);
+    acidMerge.connect(sum);
     acidAmp.connect(acidSend).connect(delaySend);
     acidOsc.start();
     acidLfo.start();

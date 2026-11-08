@@ -27,10 +27,11 @@ The glide does not retrigger the filter. The pitch smears through whatever the f
 An accent still chirps, even when the pitch slid into it.
 The leap up into the octave is the one to listen for.
 
-The base cutoff rides the phrase.
-Closed and mean while the track is still introducing itself.
-Open by the climax.
-A slow drift sits under that envelope, so the riff keeps moving after the notes repeat.
+The env mod is the ride. It climbs and falls over 32 bars.
+Low on that ride, the chirp is small. At the top, the same notes scream.
+An accent still opens further, wherever the ride is.
+The cutoff itself only drifts a little, plus the slow wobble under the envelope.
+The knob keeps cycling. The climax does not pin it open.
 
 ==================================================
 PATTERN
@@ -77,6 +78,9 @@ New harmonics do not get to sit on the kick.
 
 A little of the line goes to the delay.
 The delay return is already highpassed.
+
+One side of the dry note is a few milliseconds late.
+That is the width. It is still one saw.
 
 ==================================================
 WHERE IT PLAYS
