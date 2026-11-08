@@ -1,12 +1,11 @@
 303 ACID
 
 The bass toks.
-Two of these roll.
+This one rolls.
 
-One saw. One voice. Each is monophonic.
-The lead is the squelch in the sections below. The driver is the last section.
+One saw. One voice. The 303 is monophonic, and so is this.
 
-It sits two octaves above the bass root, and it follows that root every 8 bars.
+It sits two octaves above the bass root, and it follows that root.
 The kick and the bass keep the sub.
 The squelch lives in the mids.
 
@@ -28,50 +27,27 @@ The glide does not retrigger the filter. The pitch smears through whatever the f
 An accent still chirps, even when the pitch slid into it.
 The leap up into the octave is the one to listen for.
 
-The env mod is the ride. It climbs and falls over 32 bars.
+The env mod is the ride. It climbs and falls over a long cycle.
 Low on that ride, the chirp is small. At the top, the same notes scream.
 An accent still opens further, wherever the ride is.
 The cutoff itself only drifts a little, plus the slow wobble under the envelope.
 The knob keeps cycling. The climax does not pin it open.
 
-On the bar it enters, the cutoff opens from closed. That swoop is one bar.
-
 ==================================================
 PATTERN
 ==================================================
 
-Sixteen steps. Mostly 16ths. Two rests.
+Sixteen steps. Mostly 16ths. Leave a rest or two.
 
 The rests are there so the decay can be heard.
-Accents sit off the kick, on steps 1, 6, 9, and 14.
+Accents sit off the kick.
 Slides never run into a rest.
 
-0   root, slide up
-1   octave, accent
-2   7, slide
-3   3
-4   rest
-5   root, slide
-6   3, accent
-7   7, slide
-8   10
-9   octave, accent
-10  rest
-11  7, slide
-12  3
-13  root, slide
-14  5, accent
-15  7, let it die
-
-Four short gestures.
+A few short gestures.
 It drives. It does not solo.
 
-The same bar, then a variation, two times each.
-Pattern, pattern, variation, variation. Then it repeats.
-
-The variation keeps the rests and the accents.
-The octave answers become fifths.
-Step 8 goes up to the octave. Step 14 accents the flat seven.
+A second pattern can answer the first.
+Keep the rests and the accents. Move a few pitches.
 
 ==================================================
 SATURATION
@@ -96,40 +72,29 @@ That is the width. It is still one saw.
 DRIVING
 ==================================================
 
-The other saw. Same octave. It ticks under the lead.
+A second saw may tick under the lead.
+Same octave. Simpler pattern. No slides.
 
-Sixteen steps, all of them notes.
-du is the root. da is the fifth. dee is the octave.
+Every note can retrigger.
+Accents still sit off the kick.
 
-du du du du du da du du du du du du dee da du da
-
-No rests. No slides. Every note retriggers.
-The fifths accent, on steps 5, 13, and 15. Those sit off the kick.
-The octave is step 12. That step is the kick, so it does not chirp.
-
-The ride is the same 32 bars, half a cycle later.
-When the lead acid is playing, this cutoff sits further back.
-When the lead is open, this one is dull.
-The chirp is shorter than the lead. The note still keeps a body.
+The ride can be the same long cycle, half a turn later.
+Then this one is dull when the lead is open.
+While the lead acid is playing, this cutoff sits further back.
+The chirp is shorter. The note still keeps a body.
 The resting cutoff stays above the highpass. On the highpass, the tick disappears.
 
 Resonance stays lower. The shaper stays cooler.
-Highpass just above the lead's, so it does not sit on the kick.
+Highpass a little higher, so it does not sit on the lead.
 Almost none of it goes to the delay.
-It stays in the center. The lead keeps the width.
-Loud enough to follow. The open lead is still the louder squelch.
+It can sit in the center. The lead keeps the width.
+The open lead is still the louder squelch.
 
 ==================================================
 WHERE IT PLAYS
 ==================================================
 
-The lead acid is not in the intro.
-Not in the breakdown.
-Not in the outro.
+Not while the engine is still introducing itself.
+Not through a drop, unless a driver is what keeps the pulse.
 
-The driver starts with the intro.
-The first four bars, the cutoff starts nearly closed and opens up to its resting place.
-It stays through the breakdown, with the kick, the bass, and the pads.
-The lead acid still sits that one out.
-The driver stays for the outro. The lead acid does not.
-Neither plays the last 8. That is kick and bass, then silence.
+The kick and the bass have to be obvious before the squelch starts talking.

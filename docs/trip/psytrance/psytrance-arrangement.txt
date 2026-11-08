@@ -1,50 +1,38 @@
-THIS TRACK
+A PASS
 
-144 BPM. One pass. Six phrases, 16 bars each, then an 8-bar outro.
-Then 8 bars of kick and bass. Then 4 bars of silence, so the tails can finish.
+One pass. Phrases of 16 bars. Then it ends.
 
-The number on each phrase is energy, from 0 to 100.
+Energy is a number from 0 to 100 on each phrase.
+That number is how hard the phrase plays.
 
-1  15   intro
-2  35   the roll, and the acid
-3  55   the lead joins
-4  85   climax
-5  30   breakdown
-6  90   final assault
-7  90   outro, 8 bars
-8  55   kick and bass, 8 bars
-   --   silence, 4 bars
-
-Tension is the last four bars of a phrase, and only when energy is already at 70.
-A drop is energy at 30 or under. The intro and the breakdown are both drops.
+Tension is the last few bars of a phrase, and only when energy is already high.
+A drop is low energy.
 
 ==================================================
 WHO PLAYS
 ==================================================
 
-Kick, and the three-note bass roll: the whole track, and the last 8 bars alone.
+Kick, and the offbeat bass: the engine. They run the track.
 The roll opens only at the edge of a phrase.
 That rule is in the agent note.
 
-Acid: the lead from phrase 2. Out for a drop, and out for the outro.
-The squelch, the pattern, and the width are in the acid note.
-The driver starts in the intro, stays through the breakdown, and stays for the outro.
-It sits out the last 8.
+The engine is obvious before the squelch and the lead talk.
+Acid and the lead sit out on a drop.
 
-Lead: from phrase 3. Out for a drop, and out for the outro.
-
-Hats: not during a drop, and not for the last 8.
-The ride waits until energy is at 70.
+Hats sit out on a drop.
+The ride waits until energy is high.
 The hat body is in the mix note.
 
-Pads: until the last 8.
-They start almost silent and breathe across 32 bars, two phrases.
+Pads breathe. They do not stay open.
 The chord and that breath are in the mix note.
+
+An ending can thin to kick and bass.
+Then hold silence, so the delay and the reverb finish before the context closes.
 
 ==================================================
 DO NOT
 ==================================================
 
-Do not thin the bass for eight bars and leave it there.
+Do not thin the bass for a phrase and leave it there.
 Do not hide the pad in the noise bed.
 Do not open the pad and leave it open. That rings.

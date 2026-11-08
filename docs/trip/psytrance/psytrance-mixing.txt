@@ -78,22 +78,23 @@ ACID
 ==================================================
 
 The 303 is not the bass, and it is not the lead.
-Two saws, two octaves above the bass root. The patterns are in the acid note.
+One saw, two octaves above the bass root. The pattern is in the acid note.
 
-The lead keeps the high resonance, the hot shaper, and the wide offset.
-The driver is quieter, cooler, and dry in the center.
-Slides glide on the lead. Accents chirp, off the kick.
+A second saw may drive under it.
+That one is quieter, cooler, and dry in the center.
+The squelch keeps the high resonance, the hot shaper, and the wide offset.
+Slides glide. Accents chirp, off the kick.
 
-Order, same as the bass, on both:
+Order, same as the bass:
 
 saw → lowpass → waveshaper → highpass
 
-The lead is the shaper that is allowed to work harder.
+This is the shaper that is allowed to work harder.
 It is still after the filter, and it is still oversampled.
 The resonant peak is what gets fat. A buzz means it went too far.
 
-Highpass around 180 Hz on the lead, a little higher on the driver.
-A little of the lead goes to the delay. The driver barely does.
+Highpass around 180 Hz. A driver sits a little higher.
+A little of the squelch goes to the delay. A driver barely does.
 The kick and the bass still do not.
 
 ==================================================
@@ -127,8 +128,8 @@ Sync it to the tempo.
 Highpass the return around 200-400 Hz.
 
 Low notes repeating in the delay make the engine muddy.
-Leads, the lead acid, and zaps go to the delay.
-The driving acid barely does.
+Leads, the acid, and zaps go to the delay.
+A driving acid barely does.
 The kick and the bass do not.
 
 ==================================================
@@ -139,12 +140,12 @@ A little, in a few places.
 
 - kick body
 - bass
-- lead acid, hotter than the others, still after its filter
+- acid, hotter than the others, still after its filter
 - lead
 - one gentle stage on the whole sum
 
 Oversample each one.
-Drive the lead acid harder than the rest. The driver stays cooler. Drive none of the others hard.
+Drive the acid harder than the rest. If two play, the squelch is the hot one. The driver stays cooler. Drive none of the others hard.
 
 One master distortion, slammed by the kick, makes the bass and the lead pump.
 The kick already has its own shaper.
