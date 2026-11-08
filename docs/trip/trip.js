@@ -63,11 +63,15 @@ function glowSprite(PIXI, tex) {
   return s;
 }
 
-function wrap(s, w, h, m = 48) {
-  if (s.x < -m) s.x += w + m * 2;
-  else if (s.x > w + m) s.x -= w + m * 2;
-  if (s.y < -m) s.y += h + m * 2;
-  else if (s.y > h + m) s.y -= h + m * 2;
+// Forward travel. z 0 is far (small, at the center), z 1 has passed the camera.
+// About 3 seconds to cross at mid energy. Reduced motion passes dt 0, so it holds.
+function rush(z, dt, grade) {
+  z += dt * (0.18 + grade.drive * 0.2) * (1 + grade.kick * 0.35);
+  return z >= 1 ? z - 1 : z;
+}
+
+function fly(z) {
+  return z * z;
 }
 
 // One hue and its pair for this 8-bar block. Energy only changes speed and level.
@@ -123,10 +127,9 @@ function tunnel(PIXI, tex) {
       lines.clear();
       for (let i = 0; i < rings.length; i++) {
         const ring = rings[i];
-        ring.z += grade.drive * 0.26 * dt;
-        if (ring.z > 1) ring.z -= 1;
+        ring.z = rush(ring.z, dt, grade);
         const z = ring.z;
-        const r = (12 + z * z * maxR) * hit;
+        const r = (12 + fly(z) * maxR) * hit;
         const rot = rotOf(i, t);
         const col = hsl(i % 2 ? grade.hue2 : grade.hue, 80, 62);
         glowLine(lines, polyPoints(cx, cy, r, ring.sides, rot), col, 0.28 + z * 0.85, grade.bright * (0.3 + z * 0.7));
@@ -148,7 +151,7 @@ function tunnel(PIXI, tex) {
   };
 }
 
-// Streaks on a slow vector field, plus a few large dim orbs for depth.
+// Streaks born at the center. They curl, then fly out and grow.
 function flow(PIXI, tex, w0, h0) {
   const root = new PIXI.Container();
   const n = Math.min(420, Math.max(120, Math.round((w0 * h0) / 4000)));
@@ -156,12 +159,12 @@ function flow(PIXI, tex, w0, h0) {
   for (let i = 0; i < n; i++) {
     const s = glowSprite(PIXI, tex);
     const big = Math.random() < 0.07;
-    s.x = rand(0, w0);
-    s.y = rand(0, h0);
     s.big = big;
+    s.z = Math.random();
+    s.ang = rand(0, Math.PI * 2);
+    s.curl = rand(-0.7, 0.7);
     s.base = big ? rand(1.3, 2.6) : rand(0.07, 0.2);
     s.alpha0 = big ? rand(0.05, 0.11) : rand(0.4, 0.85);
-    s.speed = big ? rand(8, 18) : rand(30, 78);
     s.pair = i % 2;
     root.addChild(s);
     ps.push(s);
@@ -169,22 +172,29 @@ function flow(PIXI, tex, w0, h0) {
   return {
     root,
     update(t, w, h, dt, grade) {
+      const cx = w / 2;
+      const cy = h / 2;
+      const reach = Math.hypot(cx, cy) * 1.15;
       for (const s of ps) {
-        const a = (Math.sin(s.x * 0.0023 + t * 0.16) + Math.cos(s.y * 0.0027 - t * 0.11)) * Math.PI;
-        s.x += Math.cos(a) * s.speed * grade.drive * dt;
-        s.y += Math.sin(a) * s.speed * grade.drive * dt;
-        wrap(s, w, h);
+        const prev = s.z;
+        s.z = rush(s.z, dt * (s.big ? 0.42 : 1), grade);
+        if (s.z < prev) s.ang = rand(0, Math.PI * 2);
+        s.ang += s.curl * dt * (1.5 - s.z);
+        const rad = fly(s.z) * reach;
+        s.x = cx + Math.cos(s.ang) * rad;
+        s.y = cy + Math.sin(s.ang) * rad * 0.86;
+        const grow = 0.35 + fly(s.z) * 2.4;
         s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 84, s.big ? 60 : 72);
-        if (s.big) s.scale.set(s.base * (1 + grade.kick * 0.1));
-        else s.scale.set(s.base * 3.1 * (1 + grade.kick * 0.35), s.base * (1 + grade.kick * 0.35));
-        if (!s.big) s.rotation = a;
-        s.alpha = s.alpha0 * grade.bright * (1 + grade.kick * 0.2);
+        if (s.big) s.scale.set(s.base * grow * 0.5 * (1 + grade.kick * 0.1));
+        else s.scale.set(s.base * 3.2 * grow * (1 + grade.kick * 0.35), s.base * grow);
+        if (!s.big) s.rotation = s.ang;
+        s.alpha = s.alpha0 * grade.bright * (0.2 + s.z * 0.9) * (1 + grade.kick * 0.2);
       }
     },
   };
 }
 
-// Three counter-rotating polygons. Spokes stay off the core so the middle holds.
+// One mandala at three depths. Each copy grows from the center and flies past.
 function mandala(PIXI, tex) {
   const root = new PIXI.Container();
   const g = new PIXI.Graphics();
@@ -197,26 +207,30 @@ function mandala(PIXI, tex) {
     { n: 8, spin: -0.27, scale: 0.62, pair: 1 },
     { n: 3, spin: 0.09, scale: 1.22, pair: 0 },
   ];
+  let z = 0;
   return {
     root,
     update(t, w, h, dt, grade) {
       const cx = w / 2;
       const cy = h / 2;
-      const R = Math.min(w, h) * 0.4;
+      const R = Math.min(w, h) * 0.42;
+      z = rush(z, dt, grade);
       g.clear();
       rings.forEach((ring, i) => {
+        const depth = (z + i / 3) % 1;
         const rot = t * ring.spin * grade.drive;
-        const r = R * ring.scale * (i === 1 ? 1 + grade.kick * 0.06 : 1);
+        const r = R * ring.scale * (0.15 + fly(depth) * 2.2) * (i === 1 ? 1 + grade.kick * 0.06 : 1);
+        const fade = Math.sin(depth * Math.PI);
         const col = hsl(ring.pair ? grade.hue2 : grade.hue, 82, 64);
         const pts = polyPoints(cx, cy, r, ring.n, rot);
-        glowLine(g, pts, col, 0.7, grade.bright);
+        glowLine(g, pts, col, 0.55 + depth * 0.4, grade.bright * fade);
         if (i !== 0) return;
         for (let s = 0; s < ring.n; s++) {
           const a = rot + (s / ring.n) * Math.PI * 2;
           glowLine(g, [
             cx + Math.cos(a) * r * 0.22, cy + Math.sin(a) * r * 0.22,
             cx + Math.cos(a) * r, cy + Math.sin(a) * r,
-          ], col, 0.32, grade.bright * 0.8);
+          ], col, 0.28, grade.bright * fade * 0.8);
         }
       });
       core.x = cx;
@@ -229,7 +243,7 @@ function mandala(PIXI, tex) {
 }
 
 // Floor grid running at the camera, sun on the horizon, bokeh in the sky.
-function horizon(PIXI, tex, w0, h0) {
+function horizon(PIXI, tex) {
   const root = new PIXI.Container();
   const g = new PIXI.Graphics();
   g.blendMode = "add";
@@ -238,15 +252,15 @@ function horizon(PIXI, tex, w0, h0) {
   root.addChild(sun);
   const sky = Array.from({ length: 16 }, () => {
     const s = glowSprite(PIXI, tex);
-    s.x = rand(0, w0);
-    s.y = rand(0, h0 * 0.5);
+    s.u = Math.random();
+    s.z = Math.random();
     s.base = rand(0.5, 1.8);
-    s.vy = rand(10, 28);
     s.ph = rand(0, 6.28);
     s.pair = Math.random() < 0.5;
     root.addChild(s);
     return s;
   });
+  let scroll = 0;
   return {
     root,
     update(t, w, h, dt, grade) {
@@ -254,6 +268,7 @@ function horizon(PIXI, tex, w0, h0) {
       const vx = w * (0.5 + Math.sin(t * 0.12) * 0.035);
       const col = hsl(grade.hue, 78, 60);
       const col2 = hsl(grade.hue2, 74, 64);
+      scroll = rush(scroll, dt, grade);
       g.clear();
       for (let i = 0; i <= 10; i++) {
         const u = i / 10;
@@ -261,10 +276,9 @@ function horizon(PIXI, tex, w0, h0) {
         const x1 = w / 2 + (u - 0.5) * w * 1.55;
         glowLine(g, [x0, yH + 10, x1, h + 8], i % 2 ? col2 : col, 0.4, grade.bright * 0.85);
       }
-      const scroll = (t * 0.32 * grade.drive) % 1;
       for (let i = 0; i < 9; i++) {
         const z = (i / 9 + scroll) % 1;
-        const y = yH + z * z * (h * 1.04 - yH);
+        const y = yH + fly(z) * (h * 1.04 - yH);
         const spread = 0.06 + z * 0.92;
         const fade = Math.sin(z * Math.PI);
         glowLine(g, [w / 2 - spread * w * 0.78, y, w / 2 + spread * w * 0.78, y], col, 0.3 + z * 0.55, grade.bright * fade);
@@ -275,15 +289,13 @@ function horizon(PIXI, tex, w0, h0) {
       sun.scale.set(2.4 + grade.kick * 0.35);
       sun.alpha = grade.bright * 0.42;
       for (const s of sky) {
-        s.y -= s.vy * grade.drive * dt;
-        s.x += Math.sin(t * 0.35 + s.ph) * 10 * dt;
-        if (s.y < -40) {
-          s.y = yH + rand(0, 30);
-          s.x = rand(0, w);
-        }
+        s.z = rush(s.z, dt * 0.7, grade);
+        const lift = fly(s.z);
+        s.x = w * 0.5 + (s.u - 0.5) * w * (0.2 + lift * 1.2);
+        s.y = yH - lift * h * 0.62 + Math.sin(t * 0.35 + s.ph) * 6;
         s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 80, 68);
-        s.scale.set(s.base * (1 + grade.kick * 0.12));
-        s.alpha = grade.bright * (0.08 + 0.06 * Math.sin(t * 0.8 + s.ph));
+        s.scale.set(s.base * (0.35 + lift * 1.6) * (1 + grade.kick * 0.12));
+        s.alpha = grade.bright * (0.04 + 0.18 * Math.sin(s.z * Math.PI));
       }
     },
   };
@@ -299,58 +311,69 @@ function orbit(PIXI, tex) {
   root.addChild(core);
   const bodies = Array.from({ length: 5 }, (_, i) => {
     const s = glowSprite(PIXI, tex);
-    s.orbit = 0.2 + i * 0.13;
+    s.orbit = 0.55 + (i % 3) * 0.18;
     s.speed = (0.12 + i * 0.05) * (i % 2 ? -1 : 1);
     s.phase = (i / 5) * Math.PI * 2;
     s.base = 0.9 + (5 - i) * 0.28;
     s.flat = 0.42 + (i % 3) * 0.08;
+    s.z = i / 5;
     root.addChild(s);
     return s;
   });
   const dust = Array.from({ length: 48 }, () => {
     const s = glowSprite(PIXI, tex);
-    s.orbit = rand(0.16, 0.86);
+    s.orbit = rand(0.45, 1);
     s.speed = rand(-0.22, 0.22);
     s.phase = rand(0, 6.28);
     s.base = rand(0.035, 0.09);
     s.flat = rand(0.32, 0.7);
+    s.z = Math.random();
     root.addChild(s);
     return s;
   });
+  let ringZ = 0;
   return {
     root,
     update(t, w, h, dt, grade) {
       const cx = w / 2;
       const cy = h / 2;
-      const maxR = Math.min(w, h) * 0.46;
+      const maxR = Math.min(w, h) * 0.52;
+      ringZ = rush(ringZ, dt, grade);
       g.clear();
-      const ringR = maxR * 0.46;
-      const pts = [];
-      for (let i = 0; i <= 72; i++) {
-        const a = (i / 72) * Math.PI * 2 + t * 0.05;
-        pts.push(cx + Math.cos(a) * ringR, cy + Math.sin(a) * ringR * 0.58);
+      for (let k = 0; k < 2; k++) {
+        const depth = (ringZ + k * 0.5) % 1;
+        const ringR = maxR * (0.12 + fly(depth) * 1.15);
+        const pts = [];
+        for (let i = 0; i <= 72; i++) {
+          const a = (i / 72) * Math.PI * 2 + t * 0.05;
+          pts.push(cx + Math.cos(a) * ringR, cy + Math.sin(a) * ringR * 0.58);
+        }
+        glowLine(g, pts, hsl(grade.hue, 70, 64), 0.4 + depth * 0.25, grade.bright * 0.55 * Math.sin(depth * Math.PI));
       }
-      glowLine(g, pts, hsl(grade.hue, 70, 64), 0.45, grade.bright * 0.55);
       core.x = cx;
       core.y = cy;
       core.tint = hsl(grade.hue, 60, 82);
       core.scale.set(1.7 + grade.kick * 0.65);
       core.alpha = grade.bright * (0.55 + grade.kick * 0.3);
       for (const s of bodies) {
+        s.z = rush(s.z, dt, grade);
         const a = s.phase + t * s.speed * grade.drive;
-        s.x = cx + Math.cos(a) * s.orbit * maxR;
-        s.y = cy + Math.sin(a) * s.orbit * maxR * s.flat;
+        const rad = s.orbit * (0.2 + fly(s.z) * 1.6) * maxR;
+        s.x = cx + Math.cos(a) * rad;
+        s.y = cy + Math.sin(a) * rad * s.flat;
         s.tint = hsl(grade.hue2, 72, 64);
-        s.scale.set(s.base);
-        s.alpha = grade.bright * 0.32;
+        s.scale.set(s.base * (0.35 + fly(s.z) * 1.2));
+        s.alpha = grade.bright * 0.4 * (0.25 + s.z);
       }
       for (const s of dust) {
+        s.z = rush(s.z, dt, grade);
         const a = s.phase + t * s.speed * grade.drive;
-        s.x = cx + Math.cos(a) * s.orbit * maxR;
-        s.y = cy + Math.sin(a) * s.orbit * maxR * s.flat;
+        const rad = s.orbit * (0.2 + fly(s.z) * 1.6) * maxR;
+        s.x = cx + Math.cos(a) * rad;
+        s.y = cy + Math.sin(a) * rad * s.flat;
         s.tint = hsl(grade.hue, 86, 74);
-        s.scale.set(s.base * (1 + grade.kick * 0.3));
-        s.alpha = grade.bright * 0.55;
+        s.scale.set(s.base * (0.4 + fly(s.z) * 1.8) * (1 + grade.kick * 0.3));
+        s.alpha = grade.bright * 0.55 * (0.2 + s.z);
       }
     },
   };
@@ -365,34 +388,43 @@ function ribbons(PIXI, tex) {
   const sparks = Array.from({ length: 40 }, (_, i) => {
     const s = glowSprite(PIXI, tex);
     s.ribbon = i % 4;
+    s.slot = i % 3;
     s.u = Math.random();
     s.speed = rand(0.045, 0.11);
     s.base = rand(0.09, 0.2);
     root.addChild(s);
     return s;
   });
-  function yAt(i, x, w, h, t, grade) {
-    const cy = h * (0.2 + i * 0.2);
-    const amp = h * (0.055 + i * 0.012) * (1 + grade.kick * 0.08);
+  let z = 0;
+  function yAt(i, x, w, h, t, grade, depth) {
+    const spread = 0.16 + fly(depth) * 0.95;
+    const cy = h * 0.5 + (i - 1.5) * h * 0.24 * spread;
+    const amp = h * (0.045 + i * 0.01) * spread * (1 + grade.kick * 0.08);
     const k = (0.7 + i * 0.28) * grade.drive;
     return cy + Math.sin((x / w) * Math.PI * (2.2 + i * 0.45) + t * k + i) * amp;
   }
   return {
     root,
     update(t, w, h, dt, grade) {
+      z = rush(z, dt, grade);
       g.clear();
-      for (let i = 0; i < 4; i++) {
-        const pts = [];
-        for (let x = -8; x <= w + 8; x += 10) pts.push(x, yAt(i, x, w, h, t, grade));
-        glowLine(g, pts, hsl(i % 2 ? grade.hue2 : grade.hue, 82, 62), 0.72, grade.bright * (1 + grade.kick * 0.15));
+      for (let d = 0; d < 3; d++) {
+        const depth = (z + d / 3) % 1;
+        const fade = Math.sin(depth * Math.PI);
+        for (let i = 0; i < 4; i++) {
+          const pts = [];
+          for (let x = -8; x <= w + 8; x += 10) pts.push(x, yAt(i, x, w, h, t, grade, depth));
+          glowLine(g, pts, hsl(i % 2 ? grade.hue2 : grade.hue, 82, 62), 0.45 + depth * 0.4, grade.bright * fade * (1 + grade.kick * 0.15));
+        }
       }
       for (const s of sparks) {
+        const depth = (z + s.slot / 3) % 1;
         s.u = (s.u + s.speed * grade.drive * dt) % 1;
         s.x = s.u * w;
-        s.y = yAt(s.ribbon, s.x, w, h, t, grade);
+        s.y = yAt(s.ribbon, s.x, w, h, t, grade, depth);
         s.tint = hsl(s.ribbon % 2 ? grade.hue : grade.hue2, 90, 76);
-        s.scale.set(s.base * (1 + grade.kick * 0.55));
-        s.alpha = grade.bright * 0.8;
+        s.scale.set(s.base * (0.4 + fly(depth) * 1.8) * (1 + grade.kick * 0.55));
+        s.alpha = grade.bright * 0.85 * (0.25 + depth);
       }
     },
   };
@@ -423,7 +455,7 @@ async function startPixi() {
     tunnel(PIXI, tex),
     flow(PIXI, tex, w0, h0),
     mandala(PIXI, tex),
-    horizon(PIXI, tex, w0, h0),
+    horizon(PIXI, tex),
     orbit(PIXI, tex),
     ribbons(PIXI, tex),
   ];
