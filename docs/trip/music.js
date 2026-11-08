@@ -5,7 +5,7 @@
   const EIGHTH = 60 / BPM / 2;
   const LOOKAHEAD_MS = 25;
   const SCHEDULE_AHEAD = 0.12;
-  // One pass. Six phrases of 16 bars, then an 8-bar outro.
+  // One pass. Six phrases of 16 bars, an 8-bar outro, then kick and bass, then silence.
   const PHRASES = [
     { bars: 16, energy: 15 },
     { bars: 16, energy: 35 },
@@ -14,6 +14,8 @@
     { bars: 16, energy: 30 },
     { bars: 16, energy: 90 },
     { bars: 8, energy: 90, outro: true },
+    { bars: 8, energy: 55, end: true },
+    { bars: 4, energy: 0, silence: true },
   ];
   const TOTAL_BARS = PHRASES.reduce((n, p) => n + p.bars, 0);
   const TOTAL_STEPS = TOTAL_BARS * 16;
@@ -260,6 +262,8 @@
     let energy = PHRASES[0].energy;
     let barInPhrase = bar;
     let outro = false;
+    let end = false;
+    let silence = false;
     for (let i = 0; i < PHRASES.length; i++) {
       const p = PHRASES[i];
       if (bar < acc + p.bars) {
@@ -267,6 +271,8 @@
         energy = p.energy;
         barInPhrase = bar - acc;
         outro = !!p.outro;
+        end = !!p.end;
+        silence = !!p.silence;
         break;
       }
       acc += p.bars;
@@ -283,6 +289,8 @@
       tension,
       drop: energy <= 30,
       outro,
+      end,
+      silence,
     };
   }
 
@@ -368,8 +376,8 @@
 
   function playAcid(v, pattern, mod, t, c) {
     const cell = pattern[c.sixteenth];
-    // The driver plays the whole track. The lead acid waits, and it sits out the outro.
-    const quiet = mod.fromStart ? false : c.energy < 35 || c.drop || c.outro;
+    // The driver plays until the last 8. The lead acid waits, and it sits out the outro.
+    const quiet = mod.fromStart ? !!c.end : c.energy < 35 || c.drop || c.outro || c.end;
     if (!cell || quiet) {
       v.amp.gain.cancelScheduledValues(t);
       v.amp.gain.setTargetAtTime(0.0001, t, 0.02);
@@ -446,7 +454,7 @@
   }
 
   function hats(t, c) {
-    if (c.drop) return;
+    if (c.drop || c.end) return;
     const sixteenth = c.sixteenth;
     const closed = sixteenth % 2 === 1;
     const extra = c.energy > 50 && Math.random() < 0.3;
@@ -473,7 +481,7 @@
   }
 
   function ride(t, c) {
-    if (c.energy < 70 || c.sixteenth % 4 !== 2) return;
+    if (c.end || c.energy < 70 || c.sixteenth % 4 !== 2) return;
     noiseBurst(t, sum, 0.02, 0.002, 0.22, "highpass", 6500, 0.4);
     const car = ctx.createOscillator();
     const mod = ctx.createOscillator();
@@ -491,7 +499,7 @@
   }
 
   function lead(t, c) {
-    if (c.energy < 45 || c.drop || c.outro) return;
+    if (c.energy < 45 || c.drop || c.outro || c.end) return;
     const sixteenth = c.sixteenth;
     const motifA = sixteenth === 4 || sixteenth === 5 || sixteenth === 6;
     const motifB = sixteenth >= 8 && sixteenth <= 11 && c.energy > 55;
@@ -550,6 +558,14 @@
   }
 
   function fxMotion(t, c) {
+    // Last 8, then the silent bars. Let the delay and the wash die instead of looping.
+    if (c.end || c.silence) {
+      delayFbL.gain.setTargetAtTime(0.0001, t, 0.5);
+      delayFbR.gain.setTargetAtTime(0.0001, t, 0.5);
+      if (atmoGain) atmoGain.gain.setTargetAtTime(0.0001, t, 0.3);
+      if (padGain) padGain.gain.setTargetAtTime(0.0001, t, 0.4);
+      return;
+    }
     const fb = c.drop ? 0.12 : 0.22 + (c.energy / 100) * 0.18 + (c.tension ? 0.12 : 0);
     delayFbL.gain.setTargetAtTime(fb, t, 0.08);
     delayFbR.gain.setTargetAtTime(fb * 0.9, t, 0.08);
@@ -576,10 +592,18 @@
 
   function schedule(s, t) {
     const c = clock(s);
+    if (c.silence) {
+      fxMotion(t, c);
+      return;
+    }
     if (c.beat16 === 0) kick(t);
     bass(t, c);
     playAcid(leadAcid, leadAcidPattern(c.bar), LEAD_MOD, t, c);
     playAcid(driveAcid, DRIVE, DRIVE_MOD, t, c);
+    if (c.end) {
+      fxMotion(t, c);
+      return;
+    }
     hats(t, c);
     ride(t, c);
     lead(t, c);
