@@ -35,12 +35,6 @@ function setupDialog() {
   });
 }
 
-function setupStub() {
-  const uc = document.getElementById("under-construction");
-  if (!uc) return;
-  uc.addEventListener("click", (e) => e.preventDefault());
-}
-
 function cssRgb(name) {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return raw.split(/[,\s]+/).map(Number);
@@ -120,6 +114,5 @@ function setupDownload() {
 
 setupTheme();
 setupDialog();
-setupStub();
 setupDownload();
 startPixi();

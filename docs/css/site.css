@@ -181,9 +181,9 @@ body {
 
 .uc {
   justify-self: center;
+  max-width: 16rem;
+  text-align: center;
   font-size: 0.78rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--bg);
   -webkit-text-stroke: 0.55px color-mix(in srgb, var(--accent) 28%, transparent);
   paint-order: stroke fill;
