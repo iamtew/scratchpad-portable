@@ -15,6 +15,8 @@ It's very simple, let me show you:
 
 That's it! The workspace will now behave more like an assitant and not try and turn everything into your next startup MVP to ship with the intention of getting VC funding outta Silicon Valley. Sometimes we want a bit less 😁
 
+## [Fancy website!](https://iamtew.github.io/scratchpad-portable/)
+
 ---- 
 
 This repository is dedicated to the public domain under [The Unlicense](LICENSE). Enjoy!
