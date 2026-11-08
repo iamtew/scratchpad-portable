@@ -14,13 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Zip scratchpad-portable
-        run: |
-          zip -r "scratchpad-portable-${GITHUB_REF_NAME}.zip" scratchpad-portable
-          cp "scratchpad-portable-${GITHUB_REF_NAME}.zip" scratchpad-portable.zip
+        run: zip -r "scratchpad-portable-${GITHUB_REF_NAME}.zip" scratchpad-portable
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "scratchpad-portable-${GITHUB_REF_NAME}.zip" scratchpad-portable.zip --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" "scratchpad-portable-${GITHUB_REF_NAME}.zip" --generate-notes
       - name: Write docs download list
         if: github.ref_type == 'tag'
         env:
