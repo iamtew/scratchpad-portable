@@ -28,6 +28,7 @@
   let ctx;
   let sum;
   let kickIn;
+  let kickTap;
   let tone;
   let master;
   let bassFilter;
@@ -139,12 +140,12 @@
   }
 
   function kick(t) {
-    // Sweep starts low. 180 Hz into the shaper is the click.
+    // Knock lives around 150 Hz. Higher than that, and it becomes the click.
     const knock = ctx.createOscillator();
     knock.type = "sine";
-    knock.frequency.setValueAtTime(110, t);
-    knock.frequency.exponentialRampToValueAtTime(56, t + 0.055);
-    const kg = envGain(t, 0.45, 0.004, 0.16);
+    knock.frequency.setValueAtTime(150, t);
+    knock.frequency.exponentialRampToValueAtTime(52, t + 0.035);
+    const kg = envGain(t, 0.5, 0.002, 0.14);
     knock.connect(kg).connect(kickIn);
     knock.start(t);
     knock.stop(t + 0.2);
@@ -158,6 +159,16 @@
     sub.connect(sg).connect(kickIn);
     sub.start(t);
     sub.stop(t + 0.34);
+
+    // Short knock an octave up. This is the definition, and it is gone in 50 ms.
+    const beater = ctx.createOscillator();
+    beater.type = "sine";
+    beater.frequency.setValueAtTime(300, t);
+    beater.frequency.exponentialRampToValueAtTime(110, t + 0.02);
+    const bg = envGain(t, 0.42, 0.001, 0.05);
+    beater.connect(bg).connect(kickTap);
+    beater.start(t);
+    beater.stop(t + 0.07);
 
     lastKickTime = t;
   }
@@ -338,6 +349,7 @@
     ctx = null;
     sum = null;
     kickIn = null;
+    kickTap = null;
     tone = null;
     master = null;
     step = 0;
@@ -382,7 +394,7 @@
     master.gain.value = volume;
     sum.connect(glue).connect(makeup).connect(air).connect(master).connect(ctx.destination);
 
-    // Kick body only. Lowpass after the shaper, or the warmth comes out as a tick.
+    // Shaper stays cool. Level comes back after the lowpass, so the knock is audible.
     kickIn = ctx.createGain();
     kickIn.gain.value = 0.55;
     const kickWarm = ctx.createWaveShaper();
@@ -390,8 +402,12 @@
     kickWarm.oversample = "2x";
     const kickBody = ctx.createBiquadFilter();
     kickBody.type = "lowpass";
-    kickBody.frequency.value = 200;
-    kickIn.connect(kickWarm).connect(kickBody).connect(sum);
+    kickBody.frequency.value = 700;
+    const kickLevel = ctx.createGain();
+    kickLevel.gain.value = 1.5;
+    kickIn.connect(kickWarm).connect(kickBody);
+    kickTap = kickBody;
+    kickBody.connect(kickLevel).connect(sum);
 
     bassFilter = ctx.createBiquadFilter();
     bassFilter.type = "lowpass";

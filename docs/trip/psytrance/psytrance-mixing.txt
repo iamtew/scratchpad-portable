@@ -19,11 +19,10 @@ Body:
 - its own soft saturation, oversampled
 - warm the kick here
 
-The click is the top of that sweep, not a separate noise tick.
-Start it nearer 100 Hz than 200 Hz.
-Lowpass the kick after its saturator, or the new harmonics become the click.
-If the click is the first thing you hear, the sweep is still too high.
-The chest hit is the body.
+Definition is a second sine, starting near 300 Hz and gone in about 50 ms.
+That is the knock you can hear. The sub under it is the weight.
+Lowpass after the saturator, around 700 Hz, so the knock stays and the tick does not.
+Turn the kick up after that filter. Do not push the shaper harder to get volume.
 
 Keep the kick short enough that the offbeat bass still fits after it.
 Target is THUMP, not BOOOOM.
