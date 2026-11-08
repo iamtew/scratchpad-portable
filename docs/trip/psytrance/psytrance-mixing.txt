@@ -109,14 +109,14 @@ Do not cut so hard that the hats disappear.
 ATMOSPHERE
 ==================================================
 
-A pink bed, and two slow saws a fifth apart.
-They follow the bass root. The lowpass is what moves.
+A minor triad, two octaves above the bass root.
+The top note walks fifth, flat seven, fifth, third, root, third, and back.
+The lowpass drifts, so the chord breathes.
 
-Almost all of that goes to a bright reverb.
+The dry chord is what you hear.
+A send of that chord goes to a bright reverb.
 Highpass the return around 280 Hz.
-The kick and the bass do not go there.
-
-Quiet. If you can name the chord, it is too loud.
+The noise bed is only a hiss behind it. The kick and the bass do not go there.
 
 ==================================================
 DELAY

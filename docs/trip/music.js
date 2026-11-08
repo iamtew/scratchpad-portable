@@ -17,6 +17,8 @@
   const TOTAL_BARS = PHRASES.reduce((n, p) => n + p.bars, 0);
   const TOTAL_STEPS = TOTAL_BARS * 16;
   const BASS_HZ = [41.2, 41.2, 49.0, 36.71];
+  // Slow top note over the held root and third: fifth, flat seven, fifth, third, root, third.
+  const PAD_TOP = [7, 10, 7, 3, 0, 3];
   const LEAD_HZ = [329.63, 369.99, 415.3, 493.88, 554.37];
   // Semitones from the bass root, accent, slide into the next step.
   // Rests are null. Slides never run into a rest. Accents sit off the kick.
@@ -62,6 +64,7 @@
   let atmoGain;
   let atmoFilter;
   let padLo;
+  let padMid;
   let padHi;
   let padFilter;
   let padGain;
@@ -428,13 +431,16 @@
       atmoFilter.frequency.setTargetAtTime(500 + c.energy * 8 + Math.sin(t * 0.07) * 120, t, 0.4);
     }
     if (padLo) {
-      // Fifth apart, following the bass root. The filter is the movement.
-      const root = BASS_HZ[Math.floor(c.bar / 8) % BASS_HZ.length];
-      padLo.frequency.setTargetAtTime(root * 4, t, 0.7);
-      padHi.frequency.setTargetAtTime(root * 6, t, 0.9);
-      const cut = 360 + Math.sin(c.bar / 5) * 160 + (c.drop ? 0 : c.energy * 1.5);
-      padFilter.frequency.setTargetAtTime(cut, t, 0.8);
-      padGain.gain.setTargetAtTime(c.drop ? 0.012 : 0.026, t, 0.6);
+      // Minor triad two octaves above the bass, so the chord is a chord.
+      // The top note walks. The dry level is the pad. The reverb is behind it.
+      const fund = BASS_HZ[Math.floor(c.bar / 8) % BASS_HZ.length] * 8;
+      const top = PAD_TOP[Math.floor(c.bar / 4) % PAD_TOP.length];
+      padLo.frequency.setTargetAtTime(fund, t, 0.8);
+      padMid.frequency.setTargetAtTime(fund * Math.pow(2, 3 / 12), t, 0.8);
+      padHi.frequency.setTargetAtTime(fund * Math.pow(2, top / 12), t, 1.1);
+      const cut = 1400 + Math.sin(c.bar / 5) * 450 + (c.drop ? -400 : c.energy * 4);
+      padFilter.frequency.setTargetAtTime(Math.max(600, cut), t, 0.6);
+      padGain.gain.setTargetAtTime(0.055, t, 0.5);
     }
   }
 
@@ -647,26 +653,38 @@
     verbOut.gain.value = 0.32;
     verbIn.connect(verbHp).connect(verb).connect(verbOut).connect(sum);
     const bedSend = ctx.createGain();
-    bedSend.gain.value = 0.35;
+    bedSend.gain.value = 0.08;
     atmoFilter.connect(bedSend).connect(verbIn);
 
+    // Dry chord into the mix. A send behind it, not instead of it.
+    const fund = BASS_HZ[0] * 8;
     padLo = ctx.createOscillator();
     padLo.type = "sawtooth";
-    padLo.frequency.value = BASS_HZ[0] * 4;
+    padLo.frequency.value = fund;
+    padMid = ctx.createOscillator();
+    padMid.type = "sawtooth";
+    padMid.frequency.value = fund * Math.pow(2, 3 / 12);
+    padMid.detune.value = -6;
     padHi = ctx.createOscillator();
     padHi.type = "sawtooth";
-    padHi.frequency.value = BASS_HZ[0] * 6;
-    padHi.detune.value = 8;
+    padHi.frequency.value = fund * Math.pow(2, 7 / 12);
+    padHi.detune.value = 6;
     padFilter = ctx.createBiquadFilter();
     padFilter.type = "lowpass";
-    padFilter.frequency.value = 480;
-    padFilter.Q.value = 0.6;
+    padFilter.frequency.value = 1400;
+    padFilter.Q.value = 0.5;
     padGain = ctx.createGain();
-    padGain.gain.value = 0.02;
+    padGain.gain.value = 0.055;
+    const padSend = ctx.createGain();
+    padSend.gain.value = 0.65;
     padLo.connect(padFilter);
+    padMid.connect(padFilter);
     padHi.connect(padFilter);
-    padFilter.connect(padGain).connect(verbIn);
+    padFilter.connect(padGain);
+    padGain.connect(sum);
+    padGain.connect(padSend).connect(verbIn);
     padLo.start();
+    padMid.start();
     padHi.start();
   }
 
