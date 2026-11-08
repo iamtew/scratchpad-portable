@@ -104,6 +104,8 @@
     fromStart: true,
     // First bars of the track. Cutoff opens from nearly closed to the numbers above.
     wake: 4,
+    // While the lead acid is playing, sit this far back from the open cutoff.
+    tuck: 0.78,
   };
 
   // Accents stay off the kick. A slide needs a next note to land on.
@@ -375,6 +377,11 @@
         const floor = 260;
         base = floor + (base - floor) * open;
         env *= open;
+      }
+      // Lead acid is in. Darken the driver a little so it stays behind that line.
+      if (mod.tuck && c.energy >= 35 && !c.drop) {
+        base *= mod.tuck;
+        env *= mod.tuck;
       }
       const peakF = Math.max(base + 1, Math.min(4600, base + env * (accent ? mod.accent : 1)));
       const decay = accent ? mod.decayAccent : mod.decay;
