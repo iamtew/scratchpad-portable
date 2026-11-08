@@ -1,0 +1,88 @@
+303 ACID
+
+The bass toks.
+This one rolls.
+
+One saw. One voice. The 303 is monophonic, and so is this.
+
+It sits two octaves above the bass root, and it follows that root every 8 bars.
+The kick and the bass keep the sub.
+The squelch lives in the mids.
+
+==================================================
+FILTER
+==================================================
+
+Resonance stays high.
+That is the wet edge. Leave it there. Do not ride it per note.
+
+Cutoff does the squelch.
+
+A new note opens the filter in a few milliseconds, then the cutoff falls.
+Decay is short. An accent opens further and falls a little slower.
+That chirp is the squelch. Not every note gets one.
+
+A slide glides the pitch across one 16th.
+The glide does not retrigger the filter. The pitch smears through whatever the filter is already doing.
+An accent still chirps, even when the pitch slid into it.
+The leap up into the octave is the one to listen for.
+
+The base cutoff rides the phrase.
+Closed and mean while the track is still introducing itself.
+Open by the climax.
+A slow drift sits under that envelope, so the riff keeps moving after the notes repeat.
+
+==================================================
+PATTERN
+==================================================
+
+Sixteen steps. Mostly 16ths. Two rests.
+
+The rests are there so the decay can be heard.
+Accents sit off the kick, on steps 1, 6, 9, and 14.
+Slides never run into a rest.
+
+0   root, slide up
+1   octave, accent
+2   7, slide
+3   3
+4   rest
+5   root, slide
+6   3, accent
+7   7, slide
+8   10
+9   octave, accent
+10  rest
+11  7, slide
+12  3
+13  root, slide
+14  5, accent
+15  7, let it die
+
+Four short gestures.
+It drives. It does not solo.
+
+==================================================
+SATURATION
+==================================================
+
+Saw, then the resonant lowpass, then the shaper, then a highpass.
+
+The resonant peak is what gets fat.
+The shaper is hotter than the lead. It is oversampled.
+Hotter than that and the resonance turns into a buzz. Stop before the buzz.
+
+Highpass after the shaper, around 180 Hz.
+New harmonics do not get to sit on the kick.
+
+A little of the line goes to the delay.
+The delay return is already highpassed.
+
+==================================================
+WHERE IT PLAYS
+==================================================
+
+Not in the intro.
+Not in the breakdown.
+
+The kick and the bass have to be obvious before this line starts talking.

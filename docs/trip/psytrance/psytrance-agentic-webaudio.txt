@@ -192,6 +192,7 @@ Build agents.
 ClockAgent
 KickAgent
 BassAgent
+AcidAgent
 PercussionAgent
 AtmosphereAgent
 LeadAgent
