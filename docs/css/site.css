@@ -463,7 +463,6 @@ code {
 
   .shot {
     transform: none;
-    order: -1;
   }
 
   .header-link span {
