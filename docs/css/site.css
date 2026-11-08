@@ -190,13 +190,15 @@ body {
   text-decoration: none;
   opacity: 0;
   filter: drop-shadow(0 0 2px color-mix(in srgb, var(--accent) 12%, transparent));
+  transition: color 0.15s ease;
   animation:
     uc-in 1s ease 2s forwards,
     uc-glow 6s ease-in-out 3s infinite;
 }
 
 .uc:hover {
-  -webkit-text-stroke-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent);
+  -webkit-text-stroke-color: var(--accent);
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 35%, transparent));
 }
 
