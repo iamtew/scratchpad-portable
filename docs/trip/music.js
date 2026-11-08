@@ -65,22 +65,22 @@
   // Driving acid. du = root, da = fifth, dee = octave. No slides, no rests.
   // Accents stay off the kick. The octave does not chirp on the downbeat.
   const DRIVE = [
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-5, 1, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
+    [-12, 0, 0],
     [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [7, 1, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-    [12, 0, 0],
-    [7, 1, 0],
-    [0, 0, 0],
-    [7, 1, 0],
+    [-5, 1, 0],
+    [-12, 0, 0],
+    [-5, 1, 0],
   ];
   // Lead numbers are the long chirp. Driver is shorter, duller, and half a ride later.
   const LEAD_MOD = {
@@ -127,7 +127,7 @@
     haas: 0,
     fromStart: true,
     // First bars of the track. Cutoff opens from nearly closed to the numbers above.
-    wake: 4,
+    wake: 8,
     // While the lead acid is playing, sit this far back from the open cutoff.
     tuck: 0.62,
   };
