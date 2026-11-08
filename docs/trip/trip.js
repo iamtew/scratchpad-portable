@@ -88,7 +88,6 @@ out vec4 finalColor;
 uniform sampler2D uTexture;
 uniform float uTime;
 uniform float uAmt;
-uniform vec4 uInputClamp;
 
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -115,7 +114,7 @@ void main() {
   float n = fbm(uv * 4.0 + vec2(uTime * 0.07, uTime * 0.05));
   float n2 = fbm(uv * 3.0 + vec2(8.0, uTime * 0.04));
   vec2 warp = vec2(n - 0.5, n2 - 0.5) * uAmt;
-  vec2 sampleUv = clamp(uv + warp, uInputClamp.xy, uInputClamp.zw);
+  vec2 sampleUv = clamp(uv + warp, 0.0, 1.0);
   vec4 c = texture(uTexture, sampleUv);
   c *= 0.45 + 0.9 * n;
   finalColor = c;
