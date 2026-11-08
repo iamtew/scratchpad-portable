@@ -1,0 +1,11 @@
+---
+description: Meat Bag hosts docs on :8000. Clanker never starts HTTP servers.
+alwaysApply: true
+---
+
+# localhost:8000
+
+Meat Bag serves `docs/` at http://localhost:8000.
+
+- Never start an HTTP server.
+- :8000 not listening → one line: "localhost:8000 not listening." Do not start it.
