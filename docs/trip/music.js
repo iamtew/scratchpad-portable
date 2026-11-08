@@ -340,8 +340,8 @@
 
   function playAcid(v, pattern, mod, t, c) {
     const cell = pattern[c.sixteenth];
-    // The driver is in the intro. The breakdown is the drop it still sits out.
-    const quiet = mod.fromStart ? c.drop && c.phrase !== 0 : c.energy < 35 || c.drop;
+    // The driver plays the intro and the breakdown. The lead acid still waits.
+    const quiet = mod.fromStart ? false : c.energy < 35 || c.drop;
     if (!cell || quiet) {
       v.amp.gain.cancelScheduledValues(t);
       v.amp.gain.setTargetAtTime(0.0001, t, 0.02);
