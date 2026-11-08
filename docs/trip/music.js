@@ -307,6 +307,7 @@
     const dying = ctx;
     ctx = null;
     master = null;
+    step = 0;
     lastKickTime = -99;
     if (dying) dying.close();
     if (wasLive && !ended) {
