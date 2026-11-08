@@ -178,6 +178,8 @@
   let atmoBuf;
   let timer = 0;
   let nextTime = 0;
+  // Audio time of step 0. Visuals read playStep from this, not from step (that one runs ahead).
+  let anchor = 0;
   let step = 0;
   let volume = 0.7;
   let muted = false;
@@ -877,6 +879,7 @@
     wireBus();
     await ctx.resume();
     nextTime = ctx.currentTime + 0.05;
+    anchor = nextTime;
     tick();
   }
 
@@ -903,11 +906,22 @@
     get currentTime() {
       return ctx ? ctx.currentTime : 0;
     },
+    // Fractional step the speakers are on. step itself is already scheduled ahead.
+    get playStep() {
+      if (!ctx) return 0;
+      const s = (ctx.currentTime - anchor) / SIXTEENTH;
+      return Math.max(0, Math.min(TOTAL_STEPS, s));
+    },
+    get place() {
+      const s = Math.min(TOTAL_STEPS - 1, Math.floor(this.playStep));
+      return clock(Math.max(0, s));
+    },
     seek(p) {
       if (!ctx || ended) return;
       const frac = Math.max(0, Math.min(1, Number(p)));
       step = Math.min(TOTAL_STEPS - 1, Math.floor(frac * TOTAL_STEPS));
       nextTime = ctx.currentTime;
+      anchor = ctx.currentTime - step * SIXTEENTH;
       hushAcid(leadAcid);
       hushAcid(driveAcid);
     },
