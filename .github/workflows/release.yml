@@ -21,3 +21,44 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" "scratchpad-portable-${GITHUB_REF_NAME}.zip" scratchpad-portable.zip --generate-notes
+      - name: Write docs download list
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${REPO}/releases/latest" \
+            -o /tmp/latest.json
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("/tmp/latest.json").read_text(encoding="utf-8"))
+          files = []
+          for asset in data.get("assets") or []:
+              name = asset.get("name") or ""
+              low = name.lower()
+              if low.endswith(".tar") or low.endswith(".tar.gz"):
+                  continue
+              files.append(name)
+          files.sort()
+          out = {"tag": data.get("tag_name") or "", "files": files}
+          Path("/tmp/releases.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+          PY
+          git fetch origin "$DEFAULT_BRANCH"
+          git switch -C _releases-json "origin/$DEFAULT_BRANCH"
+          mkdir -p docs
+          cp /tmp/releases.json docs/releases.json
+          git add docs/releases.json
+          if git diff --cached --quiet; then
+            echo "releases.json unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m $'update docs download list\n\n- write latest release filenames for the site'
+          git push origin HEAD:"$DEFAULT_BRANCH"
