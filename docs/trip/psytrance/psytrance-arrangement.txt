@@ -24,6 +24,7 @@ That rule is in the agent note.
 
 Acid: from phrase 2. Out for a drop.
 The squelch, the pattern, and the width are in the acid note.
+The driver is the other acid, same phrase, under the lead.
 
 Lead: from phrase 3. Out for a drop.
 

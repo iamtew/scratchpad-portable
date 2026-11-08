@@ -1,4 +1,4 @@
-// Live 144 BPM full-on: kick/bass engine, a rolling 303, and the mutating agents.
+// Live 144 BPM full-on: kick/bass engine, two 303s, and the mutating agents.
 (function (global) {
   const BPM = 144;
   const SIXTEENTH = 60 / BPM / 4;
@@ -40,6 +40,80 @@
     [5, 1, 0],
     [7, 0, 0],
   ];
+  // Driving acid. du = root, da = fifth, dee = octave. No slides, no rests.
+  // Accents stay off the kick. The octave does not chirp on the downbeat.
+  const DRIVE = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [7, 1, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [12, 0, 0],
+    [7, 1, 0],
+    [0, 0, 0],
+    [7, 1, 0],
+  ];
+  // Lead numbers are the long chirp. Driver is shorter, duller, and half a ride later.
+  const LEAD_MOD = {
+    ride: 0,
+    env: 450,
+    span: 2200,
+    base: 400,
+    drift: 70,
+    accent: 1.55,
+    decay: 0.05,
+    decayAccent: 0.08,
+    q: 16,
+    qTension: 20,
+    level: 0.055,
+    levelAccent: 0.09,
+    lfo: 0.15,
+    lfoDepth: 140,
+    drive: 0.65,
+    hp: 180,
+    send: 0.14,
+    haas: 0.014,
+  };
+  const DRIVE_MOD = {
+    ride: Math.PI,
+    env: 180,
+    span: 700,
+    base: 280,
+    drift: 40,
+    accent: 1.2,
+    decay: 0.02,
+    decayAccent: 0.035,
+    q: 9,
+    qTension: 11,
+    level: 0.03,
+    levelAccent: 0.048,
+    lfo: 0.07,
+    lfoDepth: 60,
+    drive: 0.4,
+    hp: 240,
+    send: 0.05,
+    haas: 0,
+  };
+
+  // Accents stay off the kick. A slide needs a next note to land on.
+  function acidPatternOk(pattern) {
+    if (pattern.length !== 16) return false;
+    for (let i = 0; i < 16; i++) {
+      const cell = pattern[i];
+      if (!cell) continue;
+      if (cell[1] && i % 4 === 0) return false;
+      if (cell[2] && !pattern[(i + 1) % 16]) return false;
+    }
+    return true;
+  }
+  if (!acidPatternOk(ACID) || !acidPatternOk(DRIVE)) throw new Error("acid pattern");
 
   let ctx;
   let sum;
@@ -50,11 +124,8 @@
   let bassFilter;
   let bassShaper;
   let bassEq;
-  let acidOsc;
-  let acidFilter;
-  let acidAmp;
-  let acidHeld = false;
-  let acidPeak = 0.055;
+  let leadAcid;
+  let driveAcid;
   let delayL;
   let delayR;
   let delayFbL;
@@ -259,12 +330,12 @@
     return root * Math.pow(2, semi / 12);
   }
 
-  function acid(t, c) {
-    const cell = ACID[c.sixteenth];
+  function playAcid(v, pattern, mod, t, c) {
+    const cell = pattern[c.sixteenth];
     if (!cell || c.energy < 35 || c.drop) {
-      acidAmp.gain.cancelScheduledValues(t);
-      acidAmp.gain.setTargetAtTime(0.0001, t, 0.02);
-      acidHeld = false;
+      v.amp.gain.cancelScheduledValues(t);
+      v.amp.gain.setTargetAtTime(0.0001, t, 0.02);
+      v.held = false;
       return;
     }
 
@@ -272,48 +343,49 @@
     const accent = cell[1];
     const slide = cell[2];
     const hz = acidHz(semi, c.bar);
-    const next = ACID[(c.sixteenth + 1) % 16];
+    const next = pattern[(c.sixteenth + 1) % 16];
     const nextBar = c.sixteenth === 15 ? c.bar + 1 : c.bar;
 
-    acidOsc.frequency.cancelScheduledValues(t);
-    acidOsc.frequency.setValueAtTime(hz, t);
+    v.osc.frequency.cancelScheduledValues(t);
+    v.osc.frequency.setValueAtTime(hz, t);
     // End just before the next step. The next note cancels from its own time,
     // and a ramp that lands on that time gets deleted before it can glide.
     if (slide && next) {
-      acidOsc.frequency.exponentialRampToValueAtTime(acidHz(next[0], nextBar), t + SIXTEENTH - 0.001);
+      v.osc.frequency.exponentialRampToValueAtTime(acidHz(next[0], nextBar), t + SIXTEENTH - 0.001);
     }
 
     // A slide smears the pitch and leaves the filter alone.
     // An accent is the squelch, so it opens the filter even when the pitch slid in.
-    const retrig = !acidHeld || accent;
+    const retrig = !v.held || accent;
     if (retrig) {
       // Env mod climbs and falls over 32 bars. Cutoff only drifts a little.
-      const ride = 0.5 + 0.5 * Math.sin((c.bar / 32) * Math.PI * 2);
-      const env = 450 + ride * 2200;
-      const base = 400 + Math.sin(c.bar / 4) * 70;
-      const peakF = Math.min(4600, base + env * (accent ? 1.55 : 1));
-      const decay = accent ? 0.08 : 0.05;
-      acidFilter.frequency.cancelScheduledValues(t);
-      acidFilter.frequency.setValueAtTime(base, t);
-      acidFilter.frequency.exponentialRampToValueAtTime(peakF, t + 0.012);
-      acidFilter.frequency.exponentialRampToValueAtTime(base, t + 0.012 + decay);
-      acidFilter.Q.setTargetAtTime(c.tension ? 20 : 16, t, 0.05);
+      // mod.ride is half a cycle on the driver, so it is dull when the lead is open.
+      const ride = 0.5 + 0.5 * Math.sin((c.bar / 32) * Math.PI * 2 + mod.ride);
+      const env = mod.env + ride * mod.span;
+      const base = mod.base + Math.sin(c.bar / 4) * mod.drift;
+      const peakF = Math.min(4600, base + env * (accent ? mod.accent : 1));
+      const decay = accent ? mod.decayAccent : mod.decay;
+      v.filter.frequency.cancelScheduledValues(t);
+      v.filter.frequency.setValueAtTime(base, t);
+      v.filter.frequency.exponentialRampToValueAtTime(peakF, t + 0.012);
+      v.filter.frequency.exponentialRampToValueAtTime(base, t + 0.012 + decay);
+      v.filter.Q.setTargetAtTime(c.tension ? mod.qTension : mod.q, t, 0.05);
 
-      acidPeak = accent ? 0.09 : 0.055;
-      acidAmp.gain.cancelScheduledValues(t);
-      acidAmp.gain.setValueAtTime(0.0001, t);
-      acidAmp.gain.exponentialRampToValueAtTime(acidPeak, t + 0.004);
+      v.peak = accent ? mod.levelAccent : mod.level;
+      v.amp.gain.cancelScheduledValues(t);
+      v.amp.gain.setValueAtTime(0.0001, t);
+      v.amp.gain.exponentialRampToValueAtTime(v.peak, t + 0.004);
       if (!slide) {
-        acidAmp.gain.setValueAtTime(acidPeak, t + SIXTEENTH * 0.62);
-        acidAmp.gain.exponentialRampToValueAtTime(0.0001, t + SIXTEENTH * 0.95);
+        v.amp.gain.setValueAtTime(v.peak, t + SIXTEENTH * 0.62);
+        v.amp.gain.exponentialRampToValueAtTime(0.0001, t + SIXTEENTH * 0.95);
       }
     } else if (!slide) {
-      acidAmp.gain.cancelScheduledValues(t);
-      acidAmp.gain.setValueAtTime(acidPeak, t);
-      acidAmp.gain.exponentialRampToValueAtTime(0.0001, t + SIXTEENTH * 0.9);
+      v.amp.gain.cancelScheduledValues(t);
+      v.amp.gain.setValueAtTime(v.peak, t);
+      v.amp.gain.exponentialRampToValueAtTime(0.0001, t + SIXTEENTH * 0.9);
     }
 
-    acidHeld = !!slide;
+    v.held = !!slide;
   }
 
   function hats(t, c) {
@@ -449,7 +521,8 @@
     const c = clock(s);
     if (c.beat16 === 0) kick(t);
     bass(t, c);
-    acid(t, c);
+    playAcid(leadAcid, ACID, LEAD_MOD, t, c);
+    playAcid(driveAcid, DRIVE, DRIVE_MOD, t, c);
     hats(t, c);
     ride(t, c);
     lead(t, c);
@@ -485,7 +558,8 @@
     master = null;
     step = 0;
     lastKickTime = -99;
-    acidHeld = false;
+    if (leadAcid) leadAcid.held = false;
+    if (driveAcid) driveAcid.held = false;
     if (dying) dying.close();
     if (wasLive && !ended) {
       ended = true;
@@ -507,6 +581,55 @@
   function applyGain() {
     if (!master) return;
     master.gain.setTargetAtTime(muted ? 0 : volume, ctx.currentTime, 0.03);
+  }
+
+  function hushAcid(v) {
+    if (!v) return;
+    v.held = false;
+    v.amp.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.02);
+  }
+
+  function wireAcid(mod) {
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.value = BASS_HZ[0] * 4;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = mod.base;
+    filter.Q.value = mod.q;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = mod.lfo;
+    const drift = ctx.createGain();
+    drift.gain.value = mod.lfoDepth;
+    lfo.connect(drift).connect(filter.frequency);
+    const shaper = ctx.createWaveShaper();
+    shaper.curve = shaperCurve(mod.drive);
+    shaper.oversample = "2x";
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = mod.hp;
+    const amp = ctx.createGain();
+    amp.gain.value = 0.0001;
+    const send = ctx.createGain();
+    send.gain.value = mod.send;
+    osc.connect(filter).connect(shaper).connect(hp).connect(amp);
+    // A few milliseconds on one side is the width. Zero keeps the line in the center.
+    // Delay taps the mono amp, so the width is not copied into the echoes.
+    if (mod.haas) {
+      const merge = ctx.createChannelMerger(2);
+      const haas = ctx.createDelay(0.05);
+      haas.delayTime.value = mod.haas;
+      amp.connect(merge, 0, 0);
+      amp.connect(haas);
+      haas.connect(merge, 0, 1);
+      merge.connect(sum);
+    } else {
+      amp.connect(sum);
+    }
+    amp.connect(send).connect(delaySend);
+    osc.start();
+    lfo.start();
+    return { osc, filter, amp, held: false, peak: mod.level };
   }
 
   function wireBus() {
@@ -593,43 +716,9 @@
     delayR.connect(delayHp);
     delayHp.connect(sum);
 
-    // One saw for the whole track. Resonance stays high; the cutoff envelope squelches.
-    // The slow oscillator drifts under that envelope. The shaper fattens the resonant peak.
-    acidOsc = ctx.createOscillator();
-    acidOsc.type = "sawtooth";
-    acidOsc.frequency.value = BASS_HZ[0] * 4;
-    acidFilter = ctx.createBiquadFilter();
-    acidFilter.type = "lowpass";
-    acidFilter.frequency.value = 420;
-    acidFilter.Q.value = 16;
-    const acidLfo = ctx.createOscillator();
-    acidLfo.frequency.value = 0.15;
-    const acidDrift = ctx.createGain();
-    acidDrift.gain.value = 140;
-    acidLfo.connect(acidDrift).connect(acidFilter.frequency);
-    const acidShaper = ctx.createWaveShaper();
-    acidShaper.curve = shaperCurve(0.65);
-    acidShaper.oversample = "2x";
-    const acidHp = ctx.createBiquadFilter();
-    acidHp.type = "highpass";
-    acidHp.frequency.value = 180;
-    acidAmp = ctx.createGain();
-    acidAmp.gain.value = 0.0001;
-    const acidSend = ctx.createGain();
-    acidSend.gain.value = 0.14;
-    // One side a few milliseconds late. The voice is still one saw.
-    // The delay send taps the mono amp, so the echoes are not a second copy of that offset.
-    const acidMerge = ctx.createChannelMerger(2);
-    const acidHaas = ctx.createDelay(0.05);
-    acidHaas.delayTime.value = 0.014;
-    acidOsc.connect(acidFilter).connect(acidShaper).connect(acidHp).connect(acidAmp);
-    acidAmp.connect(acidMerge, 0, 0);
-    acidAmp.connect(acidHaas);
-    acidHaas.connect(acidMerge, 0, 1);
-    acidMerge.connect(sum);
-    acidAmp.connect(acidSend).connect(delaySend);
-    acidOsc.start();
-    acidLfo.start();
+    // Lead squelches and sits wide. The driver ticks in the center.
+    leadAcid = wireAcid(LEAD_MOD);
+    driveAcid = wireAcid(DRIVE_MOD);
 
     atmoFilter = ctx.createBiquadFilter();
     atmoFilter.type = "lowpass";
@@ -701,7 +790,6 @@
     ended = false;
     step = 0;
     lastKickTime = 0;
-    acidHeld = false;
     ctx = new AudioContext();
     noiseBuf = noiseBuffer(0.25, false);
     atmoBuf = noiseBuffer(2, true);
@@ -739,8 +827,8 @@
       const frac = Math.max(0, Math.min(1, Number(p)));
       step = Math.min(TOTAL_STEPS - 1, Math.floor(frac * TOTAL_STEPS));
       nextTime = ctx.currentTime;
-      acidHeld = false;
-      if (acidAmp) acidAmp.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.02);
+      hushAcid(leadAcid);
+      hushAcid(driveAcid);
     },
     get progress() {
       return Math.min(1, step / TOTAL_STEPS);

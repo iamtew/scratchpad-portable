@@ -1,9 +1,10 @@
 303 ACID
 
 The bass toks.
-This one rolls.
+Two of these roll.
 
-One saw. One voice. The 303 is monophonic, and so is this.
+One saw. One voice. Each is monophonic.
+The lead is the squelch in the sections below. The driver is the last section.
 
 It sits two octaves above the bass root, and it follows that root every 8 bars.
 The kick and the bass keep the sub.
@@ -83,10 +84,36 @@ One side of the dry note is a few milliseconds late.
 That is the width. It is still one saw.
 
 ==================================================
+DRIVING
+==================================================
+
+The other saw. Same octave. It ticks under the lead.
+
+Sixteen steps, all of them notes.
+du is the root. da is the fifth. dee is the octave.
+
+du du du du du da du du du du du du dee da du da
+
+No rests. No slides. Every note retriggers.
+The fifths accent, on steps 5, 13, and 15. Those sit off the kick.
+The octave is step 12. That step is the kick, so it does not chirp.
+
+The ride is the same 32 bars, half a cycle later.
+When the lead is open, this one is dull.
+The chirp is short. It ticks. It does not scream.
+
+Resonance stays lower. The shaper stays cooler.
+Highpass a little higher, so it does not sit on the lead.
+Almost none of it goes to the delay.
+It stays in the center. The lead keeps the width.
+Quieter than the lead.
+
+==================================================
 WHERE IT PLAYS
 ==================================================
 
 Not in the intro.
 Not in the breakdown.
 
-The kick and the bass have to be obvious before this line starts talking.
+The kick and the bass have to be obvious before either line starts.
+Both use that gate. The driver stays under the lead.
