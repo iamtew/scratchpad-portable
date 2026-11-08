@@ -1,4 +1,4 @@
-// Live 144 BPM full-on: kick/bass engine plus mutating agents.
+// Live 144 BPM full-on: kick/bass engine, a rolling 303, and the mutating agents.
 (function (global) {
   const BPM = 144;
   const SIXTEENTH = 60 / BPM / 4;
@@ -24,6 +24,26 @@
   ];
   const BASS_HZ = [41.2, 41.2, 49.0, 36.71];
   const LEAD_HZ = [329.63, 369.99, 415.3, 493.88, 554.37];
+  // Semitones from the bass root, accent, slide into the next step.
+  // Rests are null. Slides never run into a rest. Accents sit off the kick.
+  const ACID = [
+    [0, 0, 1],
+    [12, 1, 0],
+    [7, 0, 1],
+    [3, 0, 0],
+    null,
+    [0, 0, 1],
+    [3, 1, 0],
+    [7, 0, 1],
+    [10, 0, 0],
+    [12, 1, 0],
+    null,
+    [7, 0, 1],
+    [3, 0, 0],
+    [0, 0, 1],
+    [5, 1, 0],
+    [7, 0, 0],
+  ];
 
   let ctx;
   let sum;
@@ -34,6 +54,11 @@
   let bassFilter;
   let bassShaper;
   let bassEq;
+  let acidOsc;
+  let acidFilter;
+  let acidAmp;
+  let acidHeld = false;
+  let acidPeak = 0.08;
   let delayL;
   let delayR;
   let delayFbL;
@@ -210,6 +235,66 @@
     }
   }
 
+  function acidHz(semi, bar) {
+    const root = BASS_HZ[Math.floor(bar / 8) % BASS_HZ.length] * 4;
+    return root * Math.pow(2, semi / 12);
+  }
+
+  function acid(t, c) {
+    const cell = ACID[c.sixteenth];
+    if (!cell || c.energy < 35 || c.drop) {
+      acidAmp.gain.cancelScheduledValues(t);
+      acidAmp.gain.setTargetAtTime(0.0001, t, 0.02);
+      acidHeld = false;
+      return;
+    }
+
+    const semi = cell[0];
+    const accent = cell[1];
+    const slide = cell[2];
+    const hz = acidHz(semi, c.bar);
+    const next = ACID[(c.sixteenth + 1) % 16];
+    const nextBar = c.sixteenth === 15 ? c.bar + 1 : c.bar;
+
+    acidOsc.frequency.cancelScheduledValues(t);
+    acidOsc.frequency.setValueAtTime(hz, t);
+    // End just before the next step. The next note cancels from its own time,
+    // and a ramp that lands on that time gets deleted before it can glide.
+    if (slide && next) {
+      acidOsc.frequency.exponentialRampToValueAtTime(acidHz(next[0], nextBar), t + SIXTEENTH - 0.001);
+    }
+
+    // A slide smears the pitch and leaves the filter alone.
+    // An accent is the squelch, so it opens the filter even when the pitch slid in.
+    const retrig = !acidHeld || accent;
+    if (retrig) {
+      // Closed while the phrase is quiet, open by the climax. The slow sine is the drift.
+      const base = 340 + c.energy * 4 + Math.sin(c.bar / 4) * 80;
+      const peakF = Math.min(4600, base + (accent ? 2400 : 1200));
+      const decay = accent ? 0.08 : 0.05;
+      acidFilter.frequency.cancelScheduledValues(t);
+      acidFilter.frequency.setValueAtTime(base, t);
+      acidFilter.frequency.exponentialRampToValueAtTime(peakF, t + 0.012);
+      acidFilter.frequency.exponentialRampToValueAtTime(base, t + 0.012 + decay);
+      acidFilter.Q.setTargetAtTime(c.tension ? 20 : 16, t, 0.05);
+
+      acidPeak = accent ? 0.13 : 0.08;
+      acidAmp.gain.cancelScheduledValues(t);
+      acidAmp.gain.setValueAtTime(0.0001, t);
+      acidAmp.gain.exponentialRampToValueAtTime(acidPeak, t + 0.004);
+      if (!slide) {
+        acidAmp.gain.setValueAtTime(acidPeak, t + SIXTEENTH * 0.62);
+        acidAmp.gain.exponentialRampToValueAtTime(0.0001, t + SIXTEENTH * 0.95);
+      }
+    } else if (!slide) {
+      acidAmp.gain.cancelScheduledValues(t);
+      acidAmp.gain.setValueAtTime(acidPeak, t);
+      acidAmp.gain.exponentialRampToValueAtTime(0.0001, t + SIXTEENTH * 0.9);
+    }
+
+    acidHeld = !!slide;
+  }
+
   function hats(t, c) {
     if (c.drop) return;
     const sixteenth = c.sixteenth;
@@ -319,6 +404,7 @@
     const c = clock(s);
     if (c.beat16 === 0) kick(t);
     bass(t, c);
+    acid(t, c);
     hats(t, c);
     ride(t, c);
     lead(t, c);
@@ -354,6 +440,7 @@
     master = null;
     step = 0;
     lastKickTime = -99;
+    acidHeld = false;
     if (dying) dying.close();
     if (wasLive && !ended) {
       ended = true;
@@ -457,6 +544,36 @@
     delayR.connect(delayHp);
     delayHp.connect(sum);
 
+    // One saw for the whole track. Resonance stays high; the cutoff envelope squelches.
+    // The slow oscillator drifts under that envelope. The shaper fattens the resonant peak.
+    acidOsc = ctx.createOscillator();
+    acidOsc.type = "sawtooth";
+    acidOsc.frequency.value = BASS_HZ[0] * 4;
+    acidFilter = ctx.createBiquadFilter();
+    acidFilter.type = "lowpass";
+    acidFilter.frequency.value = 420;
+    acidFilter.Q.value = 16;
+    const acidLfo = ctx.createOscillator();
+    acidLfo.frequency.value = 0.15;
+    const acidDrift = ctx.createGain();
+    acidDrift.gain.value = 140;
+    acidLfo.connect(acidDrift).connect(acidFilter.frequency);
+    const acidShaper = ctx.createWaveShaper();
+    acidShaper.curve = shaperCurve(0.65);
+    acidShaper.oversample = "2x";
+    const acidHp = ctx.createBiquadFilter();
+    acidHp.type = "highpass";
+    acidHp.frequency.value = 180;
+    acidAmp = ctx.createGain();
+    acidAmp.gain.value = 0.0001;
+    const acidSend = ctx.createGain();
+    acidSend.gain.value = 0.2;
+    acidOsc.connect(acidFilter).connect(acidShaper).connect(acidHp).connect(acidAmp);
+    acidAmp.connect(sum);
+    acidAmp.connect(acidSend).connect(delaySend);
+    acidOsc.start();
+    acidLfo.start();
+
     atmoFilter = ctx.createBiquadFilter();
     atmoFilter.type = "lowpass";
     atmoFilter.frequency.value = 700;
@@ -474,6 +591,7 @@
     ended = false;
     step = 0;
     lastKickTime = 0;
+    acidHeld = false;
     ctx = new AudioContext();
     noiseBuf = noiseBuffer(0.25, false);
     atmoBuf = noiseBuffer(2, true);
@@ -511,6 +629,8 @@
       const frac = Math.max(0, Math.min(1, Number(p)));
       step = Math.min(TOTAL_STEPS - 1, Math.floor(frac * TOTAL_STEPS));
       nextTime = ctx.currentTime;
+      acidHeld = false;
+      if (acidAmp) acidAmp.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.02);
     },
     get progress() {
       return Math.min(1, step / TOTAL_STEPS);
