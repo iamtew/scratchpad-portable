@@ -99,7 +99,8 @@ TOP
 ==================================================
 
 Hats and rides live above the lead.
-Highpass them so they stay hats.
+The hat is two noises: air above 6 kHz, and a short tick around 4 kHz.
+Air alone is thin. The tick is the body. It still sits above the lead.
 
 A high shelf on the mix, a few dB down around 7-8 kHz, takes the fizz off after the saturators.
 Do not cut so hard that the hats disappear.

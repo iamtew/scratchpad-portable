@@ -304,12 +304,23 @@
     const extra = c.energy > 50 && Math.random() < 0.3;
     if (!closed && !extra) return;
     if (closed && c.energy < 20 && sixteenth % 4 !== 1) return;
-    const open = c.energy > 60 && sixteenth === 14;
-    const decay = open ? 0.16 : 0.03;
-    const peak = open ? 0.045 : 0.028;
-    noiseBurst(t, sum, peak, 0.001, decay, "highpass", open ? 7000 : 6000, 0.6);
-    if (c.energy > 40 && Math.random() < 0.7) {
-      noiseBurst(t, sum, 0.012 + Math.random() * 0.018, 0.001, 0.04, "bandpass", 5500, 1.2);
+    const open = c.energy > 60 && (sixteenth === 6 || sixteenth === 14);
+    const decay = open ? 0.16 : 0.045;
+    const peak = open ? 0.05 : 0.04;
+    // Air on top, a tick under it. Hiss alone is what made this thin.
+    noiseBurst(t, sum, peak, 0.001, decay, "highpass", open ? 7000 : 6500, 0.7);
+    noiseBurst(t, sum, peak * 0.75, 0.001, decay * 0.75, "bandpass", open ? 5000 : 4200, 1.4);
+    if (Math.random() < (c.energy < 20 ? 0.35 : 0.8)) {
+      noiseBurst(
+        t,
+        sum,
+        0.016 + Math.random() * 0.02,
+        0.002,
+        0.045 + Math.random() * 0.03,
+        "bandpass",
+        5200 + Math.random() * 1800,
+        2
+      );
     }
   }
 
