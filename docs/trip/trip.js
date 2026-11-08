@@ -131,24 +131,36 @@ function setupAudioUi() {
   });
 }
 
+function fmtTime(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function paintTime() {
+  const music = window.TripMusic;
+  document.getElementById("time").textContent = `${fmtTime(music.elapsed)} / ${fmtTime(music.duration)}`;
+}
+
 function resetToBegin() {
   const gate = document.querySelector(".gate");
   const bar = document.querySelector(".bar");
   const begin = document.getElementById("begin");
-  const prog = document.getElementById("prog");
+  const seek = document.getElementById("seek");
   bar.hidden = true;
   gate.hidden = false;
   gate.classList.remove("fade");
   begin.disabled = false;
-  prog.value = 0;
+  seek.value = 0;
+  paintTime();
   document.title = "Are you ready?";
 }
 
 function watchProgress() {
   const music = window.TripMusic;
-  const prog = document.getElementById("prog");
+  const seek = document.getElementById("seek");
   if (music.ended) return;
-  prog.value = music.progress;
+  if (seek.dataset.drag !== "1") seek.value = music.progress;
+  paintTime();
   requestAnimationFrame(watchProgress);
 }
 
@@ -157,12 +169,31 @@ function setupBegin() {
   const bar = document.querySelector(".bar");
   const begin = document.getElementById("begin");
   const vol = document.getElementById("vol");
+  const seek = document.getElementById("seek");
   window.TripMusic.onEnded = resetToBegin;
+  paintTime();
+  document.getElementById("stop").addEventListener("click", () => {
+    window.TripMusic.stop();
+  });
+  seek.addEventListener("pointerdown", () => {
+    seek.dataset.drag = "1";
+  });
+  seek.addEventListener("pointerup", () => {
+    seek.dataset.drag = "0";
+  });
+  seek.addEventListener("pointercancel", () => {
+    seek.dataset.drag = "0";
+  });
+  seek.addEventListener("input", () => {
+    window.TripMusic.seek(seek.value);
+    paintTime();
+  });
   begin.addEventListener("click", async () => {
     begin.disabled = true;
     await window.TripMusic.start();
     window.TripMusic.setVolume(vol.value);
-    document.getElementById("prog").value = 0;
+    seek.value = 0;
+    paintTime();
     watchProgress();
     gate.classList.add("fade");
     startPixi();

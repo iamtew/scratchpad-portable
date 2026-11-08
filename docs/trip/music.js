@@ -423,8 +423,20 @@
     get currentTime() {
       return ctx ? ctx.currentTime : 0;
     },
+    seek(p) {
+      if (!ctx || ended) return;
+      const frac = Math.max(0, Math.min(1, Number(p)));
+      step = Math.min(TOTAL_STEPS - 1, Math.floor(frac * TOTAL_STEPS));
+      nextTime = ctx.currentTime;
+    },
     get progress() {
       return Math.min(1, step / TOTAL_STEPS);
+    },
+    get duration() {
+      return TOTAL_STEPS * SIXTEENTH;
+    },
+    get elapsed() {
+      return Math.min(TOTAL_STEPS, step) * SIXTEENTH;
     },
     get ended() {
       return ended;

@@ -11,21 +11,28 @@
     <canvas id="pixi" aria-hidden="true"></canvas>
 
     <header class="bar" hidden>
-      <a class="home" href="../">
-        <span class="icon icon-back" aria-hidden="true"></span>
-        Home
-      </a>
-      <progress id="prog" class="prog" max="1" value="0" aria-label="Track"></progress>
+      <button type="button" class="nav" id="stop">
+        <span class="icon icon-x" aria-hidden="true"></span>
+        Stop
+      </button>
+      <div class="transport">
+        <input id="seek" class="fader" type="range" min="0" max="1" step="0.001" value="0" aria-label="Seek">
+        <span id="time" class="time">0:00 / 0:00</span>
+      </div>
       <div class="audio">
         <button type="button" id="mute" aria-pressed="false" aria-label="Mute">
           <span class="icon icon-vol" aria-hidden="true"></span>
           <span class="icon icon-vol-off" aria-hidden="true"></span>
         </button>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Volume">
+        <input id="vol" class="fader" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Volume">
       </div>
     </header>
 
     <div class="gate">
+      <a class="nav gate-home" href="../">
+        <span class="icon icon-back" aria-hidden="true"></span>
+        Home
+      </a>
       <button type="button" class="begin" id="begin">Begin</button>
     </div>
 

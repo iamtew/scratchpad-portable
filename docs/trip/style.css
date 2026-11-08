@@ -49,35 +49,29 @@ body {
   right: 0;
   z-index: 3;
   display: grid;
-  grid-template-columns: minmax(6rem, 1fr) minmax(8rem, 18rem) minmax(6rem, 1fr);
+  grid-template-columns: auto minmax(10rem, 1fr) auto;
   align-items: center;
+  gap: 0.7rem;
   padding: 0.35rem 0.85rem;
   background: color-mix(in srgb, #050506 55%, transparent);
   border-bottom: 1px solid color-mix(in srgb, #fff 8%, transparent);
   backdrop-filter: blur(10px);
 }
 
-.home {
-  justify-self: start;
+.transport {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.12rem;
+  min-width: 0;
 }
 
-.prog {
-  width: 100%;
-  height: 0.28rem;
-  border: 0;
-  appearance: none;
-  background: color-mix(in srgb, #fff 18%, transparent);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.prog::-webkit-progress-bar {
-  background: color-mix(in srgb, #fff 18%, transparent);
-}
-
-.prog::-webkit-progress-value,
-.prog::-moz-progress-bar {
-  background: #e8e4f0;
+.time {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, #e8e4f0 70%, transparent);
 }
 
 .audio {
@@ -87,7 +81,7 @@ body {
   gap: 0.55rem;
 }
 
-.home,
+.nav,
 .audio button {
   display: inline-flex;
   align-items: center;
@@ -102,7 +96,7 @@ body {
   cursor: pointer;
 }
 
-.home:hover,
+.nav:hover,
 .audio button:hover {
   color: #fff;
 }
@@ -112,15 +106,19 @@ body {
   display: none;
 }
 
-#vol {
-  width: 7rem;
+.fader {
+  width: 100%;
   height: 0.28rem;
   appearance: none;
   background: color-mix(in srgb, #fff 18%, transparent);
   border-radius: 99px;
 }
 
-#vol::-webkit-slider-thumb {
+#vol {
+  width: 7rem;
+}
+
+.fader::-webkit-slider-thumb {
   appearance: none;
   width: 0.7rem;
   height: 0.7rem;
@@ -139,8 +137,15 @@ body {
 }
 
 .icon-back { --icon: url("../vendor/tabler/arrow-left.svg"); }
+.icon-x { --icon: url("../vendor/tabler/x.svg"); }
 .icon-vol { --icon: url("../vendor/tabler/volume.svg"); }
 .icon-vol-off { --icon: url("../vendor/tabler/volume-off.svg"); }
+
+.gate-home {
+  position: absolute;
+  top: 0.35rem;
+  left: 0.85rem;
+}
 
 .gate {
   position: fixed;
