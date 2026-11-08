@@ -27,6 +27,8 @@
 
   let ctx;
   let sum;
+  let kickIn;
+  let tone;
   let master;
   let bassFilter;
   let bassShaper;
@@ -142,7 +144,7 @@
     knock.frequency.setValueAtTime(180, t);
     knock.frequency.exponentialRampToValueAtTime(70, t + 0.04);
     const kg = envGain(t, 0.45, 0.001, 0.15);
-    knock.connect(kg).connect(sum);
+    knock.connect(kg).connect(kickIn);
     knock.start(t);
     knock.stop(t + 0.18);
 
@@ -152,11 +154,11 @@
     sub.frequency.setValueAtTime(90, t);
     sub.frequency.exponentialRampToValueAtTime(46, t + 0.08);
     const sg = envGain(t, 0.5, 0.001, 0.3);
-    sub.connect(sg).connect(sum);
+    sub.connect(sg).connect(kickIn);
     sub.start(t);
     sub.stop(t + 0.34);
 
-    noiseBurst(t, sum, 0.1, 0.001, 0.012, "bandpass", 2000, 1);
+    noiseBurst(t, sum, 0.04, 0.001, 0.01, "bandpass", 1800, 0.7);
     lastKickTime = t;
   }
 
@@ -240,21 +242,28 @@
     if (!motifA && !motifB && !motifC) return;
 
     const note = LEAD_HZ[(c.bar + sixteenth) % LEAD_HZ.length];
-    const osc = ctx.createOscillator();
-    osc.type = sixteenth % 2 ? "square" : "sawtooth";
-    osc.frequency.value = note;
     const lp = ctx.createBiquadFilter();
     lp.type = "lowpass";
     lp.Q.value = 3 + Math.sin(t * 2.1) * 1.2;
     lp.frequency.setValueAtTime(700 + c.energy * 12, t);
-    lp.frequency.exponentialRampToValueAtTime(400 + c.energy * 8, t + 0.12);
-    const peak = 0.035 + (c.energy / 100) * 0.04;
-    const g = envGain(t, peak, 0.002, 0.09);
-    osc.connect(lp).connect(g);
-    g.connect(sum);
-    g.connect(delaySend);
+    lp.frequency.exponentialRampToValueAtTime(400 + c.energy * 8, t + 0.14);
+    const peak = 0.04 + (c.energy / 100) * 0.045;
+    // Same note, not an octave down. Body in the mids, not a second bass.
+    const body = ctx.createOscillator();
+    body.type = "sine";
+    body.frequency.value = note;
+    const bg = envGain(t, peak * 0.45, 0.004, 0.13);
+    body.connect(bg).connect(lp);
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.value = note;
+    const g = envGain(t, peak, 0.002, 0.12);
+    osc.connect(g).connect(lp);
+    lp.connect(tone);
+    body.start(t);
     osc.start(t);
-    osc.stop(t + 0.14);
+    body.stop(t + 0.16);
+    osc.stop(t + 0.15);
   }
 
   function laser(t, c) {
@@ -328,6 +337,8 @@
     const dying = ctx;
     ctx = null;
     sum = null;
+    kickIn = null;
+    tone = null;
     master = null;
     step = 0;
     lastKickTime = -99;
@@ -368,6 +379,13 @@
     master.gain.value = volume;
     sum.connect(glue).connect(air).connect(master).connect(ctx.destination);
 
+    // Kick body only. The click stays on the sum so saturation does not sharpen it.
+    kickIn = ctx.createGain();
+    const kickWarm = ctx.createWaveShaper();
+    kickWarm.curve = shaperCurve(0.25);
+    kickWarm.oversample = "2x";
+    kickIn.connect(kickWarm).connect(sum);
+
     bassFilter = ctx.createBiquadFilter();
     bassFilter.type = "lowpass";
     bassFilter.frequency.value = 240;
@@ -386,8 +404,17 @@
     mud.gain.value = -1.5;
     bassFilter.connect(bassShaper).connect(bassEq).connect(mud).connect(sum);
 
+    // Lead saturator feeds the dry mix and the delay, so the echoes match the note.
+    tone = ctx.createGain();
+    const toneWarm = ctx.createWaveShaper();
+    toneWarm.curve = shaperCurve(0.3);
+    toneWarm.oversample = "2x";
+    tone.connect(toneWarm);
+    toneWarm.connect(sum);
+
     delaySend = ctx.createGain();
     delaySend.gain.value = 0.55;
+    toneWarm.connect(delaySend);
     delayL = ctx.createDelay(1);
     delayR = ctx.createDelay(1);
     delayL.delayTime.value = EIGHTH;
