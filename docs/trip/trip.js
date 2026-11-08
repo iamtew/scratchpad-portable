@@ -220,13 +220,13 @@ function flow(PIXI, tex, w0, h0) {
   const ps = [];
   for (let i = 0; i < n; i++) {
     const s = glowSprite(PIXI, tex);
-    const big = Math.random() < 0.07;
+    const big = Math.random() < 0.12;
     s.big = big;
     s.z = Math.random();
     s.ang = rand(0, Math.PI * 2);
     s.curl = rand(-0.7, 0.7);
-    s.base = big ? rand(1.3, 2.6) : rand(0.07, 0.2);
-    s.alpha0 = big ? rand(0.05, 0.11) : rand(0.4, 0.85);
+    s.base = big ? rand(1.8, 3.4) : rand(0.07, 0.2);
+    s.alpha0 = big ? rand(0.06, 0.14) : rand(0.4, 0.85);
     s.pair = i % 2;
     root.addChild(s);
     ps.push(s);
@@ -247,7 +247,7 @@ function flow(PIXI, tex, w0, h0) {
         s.y = cy + Math.sin(s.ang) * rad * 0.86;
         const grow = 0.35 + fly(s.z) * 2.4;
         s.tint = hsl(s.pair ? grade.hue2 : grade.hue, 84, s.big ? 60 : 72);
-        if (s.big) s.scale.set(s.base * grow * 0.5 * (1 + grade.kick * 0.1));
+        if (s.big) s.scale.set(s.base * grow * 0.7 * (1 + grade.kick * 0.1));
         else s.scale.set(s.base * 3.2 * grow * (1 + grade.kick * 0.35), s.base * grow);
         if (!s.big) s.rotation = s.ang;
         s.alpha = s.alpha0 * grade.bright * (0.2 + s.z * 0.9) * (1 + grade.kick * 0.2);
