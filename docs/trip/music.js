@@ -67,6 +67,10 @@
   let delaySend;
   let atmoGain;
   let atmoFilter;
+  let padLo;
+  let padHi;
+  let padFilter;
+  let padGain;
   let noiseBuf;
   let atmoBuf;
   let timer = 0;
@@ -99,6 +103,20 @@
     const n = Math.floor(ctx.sampleRate * seconds);
     const buf = ctx.createBuffer(1, n, ctx.sampleRate);
     fillNoise(buf.getChannelData(0), pink);
+    return buf;
+  }
+
+  function reverbBuffer() {
+    // Bright wash. The curve kills the tail so it does not drone forever.
+    const seconds = 1.8;
+    const n = Math.floor(ctx.sampleRate * seconds);
+    const buf = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < n; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+      }
+    }
     return buf;
   }
 
@@ -411,6 +429,15 @@
       atmoGain.gain.setTargetAtTime(a, t, 0.2);
       atmoFilter.frequency.setTargetAtTime(500 + c.energy * 8 + Math.sin(t * 0.07) * 120, t, 0.4);
     }
+    if (padLo) {
+      // Fifth apart, following the bass root. The filter is the movement.
+      const root = BASS_HZ[Math.floor(c.bar / 8) % BASS_HZ.length];
+      padLo.frequency.setTargetAtTime(root * 4, t, 0.7);
+      padHi.frequency.setTargetAtTime(root * 6, t, 0.9);
+      const cut = 360 + Math.sin(c.bar / 5) * 160 + (c.drop ? 0 : c.energy * 1.5);
+      padFilter.frequency.setTargetAtTime(cut, t, 0.8);
+      padGain.gain.setTargetAtTime(c.drop ? 0.012 : 0.026, t, 0.6);
+    }
   }
 
   function schedule(s, t) {
@@ -607,8 +634,42 @@
     const atmo = ctx.createBufferSource();
     atmo.buffer = atmoBuf;
     atmo.loop = true;
-    atmo.connect(atmoFilter).connect(atmoGain).connect(sum);
+    atmo.connect(atmoFilter);
+    atmoFilter.connect(atmoGain).connect(sum);
     atmo.start();
+
+    // Pads and the noise bed, highpassed so the wash stays off the kick.
+    const verbIn = ctx.createGain();
+    const verbHp = ctx.createBiquadFilter();
+    verbHp.type = "highpass";
+    verbHp.frequency.value = 280;
+    const verb = ctx.createConvolver();
+    verb.buffer = reverbBuffer();
+    const verbOut = ctx.createGain();
+    verbOut.gain.value = 0.32;
+    verbIn.connect(verbHp).connect(verb).connect(verbOut).connect(sum);
+    const bedSend = ctx.createGain();
+    bedSend.gain.value = 0.35;
+    atmoFilter.connect(bedSend).connect(verbIn);
+
+    padLo = ctx.createOscillator();
+    padLo.type = "sawtooth";
+    padLo.frequency.value = BASS_HZ[0] * 4;
+    padHi = ctx.createOscillator();
+    padHi.type = "sawtooth";
+    padHi.frequency.value = BASS_HZ[0] * 6;
+    padHi.detune.value = 8;
+    padFilter = ctx.createBiquadFilter();
+    padFilter.type = "lowpass";
+    padFilter.frequency.value = 480;
+    padFilter.Q.value = 0.6;
+    padGain = ctx.createGain();
+    padGain.gain.value = 0.02;
+    padLo.connect(padFilter);
+    padHi.connect(padFilter);
+    padFilter.connect(padGain).connect(verbIn);
+    padLo.start();
+    padHi.start();
   }
 
   async function start() {

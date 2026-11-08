@@ -106,6 +106,19 @@ A high shelf on the mix, a few dB down around 7-8 kHz, takes the fizz off after 
 Do not cut so hard that the hats disappear.
 
 ==================================================
+ATMOSPHERE
+==================================================
+
+A pink bed, and two slow saws a fifth apart.
+They follow the bass root. The lowpass is what moves.
+
+Almost all of that goes to a bright reverb.
+Highpass the return around 280 Hz.
+The kick and the bass do not go there.
+
+Quiet. If you can name the chord, it is too loud.
+
+==================================================
 DELAY
 ==================================================
 
