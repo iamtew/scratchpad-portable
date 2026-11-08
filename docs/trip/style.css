@@ -158,6 +158,7 @@ body::after {
   position: absolute;
   top: 0.35rem;
   left: 0.85rem;
+  z-index: 2;
 }
 
 .gate {
@@ -177,6 +178,66 @@ body::after {
 .gate.fade {
   opacity: 0;
   pointer-events: none;
+}
+
+.vaps {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.vap {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56px);
+  mix-blend-mode: screen;
+  opacity: 0.58;
+  animation: vap-drift 18s ease-in-out infinite alternate;
+}
+
+.vap-a {
+  width: 44vmin;
+  height: 34vmin;
+  left: 6%;
+  top: 16%;
+  background: hsl(0 78% 48%);
+}
+
+.vap-b {
+  width: 50vmin;
+  height: 38vmin;
+  right: 4%;
+  top: 10%;
+  background: hsl(140 78% 42%);
+  animation-duration: 22s;
+  animation-delay: -4s;
+}
+
+.vap-c {
+  width: 36vmin;
+  height: 44vmin;
+  left: 16%;
+  bottom: 6%;
+  background: hsl(140 78% 45%);
+  animation-duration: 16s;
+  animation-delay: -8s;
+}
+
+.vap-d {
+  width: 42vmin;
+  height: 32vmin;
+  right: 14%;
+  bottom: 14%;
+  background: hsl(0 78% 46%);
+  animation-duration: 20s;
+  animation-delay: -2s;
+}
+
+@keyframes vap-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(5%, -7%) scale(1.1); }
 }
 
 .begin {
