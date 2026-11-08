@@ -5,9 +5,9 @@
   const EIGHTH = 60 / BPM / 2;
   const LOOKAHEAD_MS = 25;
   const SCHEDULE_AHEAD = 0.12;
-  // One pass. Intro is 8 bars; the rest are 16. Then the track ends.
+  // One pass. Each phrase is 16 bars. Then the track ends.
   const PHRASES = [
-    { bars: 8, energy: 15 },
+    { bars: 16, energy: 15 },
     { bars: 16, energy: 35 },
     { bars: 16, energy: 55 },
     { bars: 16, energy: 85 },
