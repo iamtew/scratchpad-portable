@@ -191,9 +191,9 @@ body::after {
 .vap {
   position: absolute;
   border-radius: 50%;
-  filter: blur(56px);
+  filter: blur(42px);
   mix-blend-mode: screen;
-  opacity: 0.58;
+  opacity: 0.72;
   animation: vap-drift 18s ease-in-out infinite alternate;
 }
 
@@ -241,20 +241,66 @@ body::after {
 }
 
 .begin {
+  position: relative;
+  z-index: 1;
   appearance: none;
   border: 0;
-  background: none;
-  color: #f2eefc;
   font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  font-size: clamp(4.8rem, 14vw, 9.2rem);
   letter-spacing: -0.06em;
   cursor: pointer;
-  text-shadow: 0 0 40px color-mix(in srgb, #a78bfa 45%, transparent);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(
+    135deg,
+    hsl(0 95% 62%) 0%,
+    hsl(0 95% 62%) 22%,
+    hsl(140 95% 58%) 44%,
+    hsl(140 95% 58%) 66%,
+    hsl(0 95% 62%) 88%,
+    hsl(0 95% 62%) 100%
+  );
+  background-size: 260% 260%;
+  background-position: 0% 0%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter:
+    drop-shadow(0 0 16px hsl(0 95% 55% / 0.45))
+    drop-shadow(0 0 28px hsl(140 90% 50% / 0.32));
+  animation:
+    begin-glow 2.5s ease-in-out infinite alternate,
+    begin-walk 9s linear infinite;
 }
 
 .begin:hover,
 .begin:focus-visible {
-  color: #fff;
   outline: none;
+  filter:
+    drop-shadow(0 0 28px hsl(0 95% 62% / 0.7))
+    drop-shadow(0 0 48px hsl(140 90% 55% / 0.5));
+}
+
+@keyframes begin-glow {
+  from {
+    filter:
+      drop-shadow(0 0 12px hsl(0 95% 55% / 0.35))
+      drop-shadow(0 0 20px hsl(140 90% 50% / 0.24));
+  }
+  to {
+    filter:
+      drop-shadow(0 0 28px hsl(0 95% 62% / 0.7))
+      drop-shadow(0 0 52px hsl(140 90% 55% / 0.48));
+  }
+}
+
+@keyframes begin-walk {
+  to { background-position: 100% 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vap,
+  .begin {
+    animation: none;
+  }
 }
